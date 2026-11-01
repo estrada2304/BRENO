@@ -1,0 +1,58 @@
+.earnings-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.earnings-overview-card{position:relative;display:flex;min-height:132px;flex-direction:column;align-items:flex-start;justify-content:center;padding:17px 18px 15px 62px;overflow:hidden;background:linear-gradient(145deg,rgba(195,230,246,.085),rgba(7,18,28,.58)),rgba(218,240,248,.035)}
+.earnings-overview-card:after{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--overview-glow),transparent);opacity:.65}
+.earnings-overview-card.collected{--overview-glow:#5affce;--overview-icon:#7affd9}
+.earnings-overview-card.awaiting{--overview-glow:#ffd27c;--overview-icon:#ffd27c}
+.earnings-overview-card.overdue{--overview-glow:#ff787d;--overview-icon:#ff9096}
+.earnings-overview-icon{position:absolute;left:17px;top:18px;display:grid;place-items:center;width:32px;height:32px;border:1px solid color-mix(in srgb,var(--overview-icon),transparent 65%);border-radius:10px;color:var(--overview-icon);background:linear-gradient(155deg,rgba(255,255,255,.17),rgba(0,0,0,.25)),linear-gradient(145deg,color-mix(in srgb,var(--overview-icon),transparent 83%),rgba(6,20,30,.85));box-shadow:0 4px 9px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.25),inset 0 -2px rgba(0,0,0,.46),0 0 12px color-mix(in srgb,var(--overview-icon),transparent 87%)}
+.earnings-overview-label{color:#9bb4c0;font:8px 'DM Mono',monospace;letter-spacing:1px}
+.earnings-overview-card>b{margin-top:8px;color:#e5f5fa;font:500 25px 'Space Grotesk',sans-serif;text-shadow:0 1px 13px color-mix(in srgb,var(--overview-glow),transparent 85%)}
+.earnings-overview-card>small{display:flex;align-items:center;gap:4px;margin-top:4px;color:#8da7b3;font-size:9px}
+.earnings-overview-card.collected>small svg{color:#6df3ca}
+.earnings-overview-card.overdue>small svg{color:#ff9494}
+.earnings-chart-card{position:relative;overflow:hidden;margin-bottom:14px;padding:17px 19px 12px;background:linear-gradient(145deg,rgba(190,226,244,.075),rgba(5,16,26,.58)),rgba(220,241,248,.035)}
+.earnings-section-heading,.earnings-ledger-heading{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.earnings-section-heading h2,.earnings-ledger-heading h2{margin:5px 0 0;color:#e2f2f7;font:500 15px 'Space Grotesk',sans-serif}
+.earnings-section-heading p,.earnings-ledger-heading p{margin:3px 0 0;color:#819aa6;font-size:9px}
+.earnings-peak-label{padding:6px 9px;border:1px solid rgba(120,236,211,.18);border-radius:6px;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(0,0,0,.19));box-shadow:inset 0 1px rgba(255,255,255,.11),inset 0 -1px rgba(0,0,0,.3);color:#9df7dd;font:8px 'DM Mono',monospace;white-space:nowrap}
+.earnings-chart-scroll{width:100%;overflow:auto;scrollbar-width:thin;scrollbar-color:rgba(111,218,211,.28) transparent}
+.earnings-chart-svg{display:block;width:100%;min-width:450px;height:190px;margin-top:6px;overflow:visible}
+.earnings-chart-gridline{stroke:rgba(194,225,238,.09);stroke-width:1;stroke-dasharray:3 5}
+.income-bar{stroke:rgba(240,255,255,.45);stroke-width:.7}
+.income-bar.paid{filter:drop-shadow(0 0 4px rgba(71,244,207,.38))}
+.income-bar.pending{filter:drop-shadow(0 0 4px rgba(255,197,93,.25))}
+.earnings-chart-value{fill:#d7e8ec;text-anchor:middle;font:8px 'DM Mono',monospace}
+.earnings-chart-label{fill:#7f98a4;text-anchor:middle;font:8px 'DM Mono',monospace;letter-spacing:.7px}
+.earnings-chart-empty-mark{stroke:rgba(180,207,217,.2);stroke-width:2;stroke-linecap:round}
+.earnings-chart-legend{display:flex;align-items:center;gap:16px;padding-top:7px;border-top:1px solid rgba(211,238,248,.07);color:#90a9b4;font-size:8px}
+.earnings-chart-legend>span{display:flex;align-items:center;gap:6px}
+.chart-legend-led{width:7px;height:7px;border:1px solid rgba(255,255,255,.42);border-radius:2px;box-shadow:inset 0 1px rgba(255,255,255,.5),0 0 6px currentColor}
+.chart-legend-led.paid{background:linear-gradient(145deg,#baffee,#30cdb0 65%,#126259);color:#51edc9}
+.chart-legend-led.pending{background:linear-gradient(145deg,#ffe7b1,#ecac4b 65%,#74501f);color:#f4bd66}
+.earnings-chart-period{margin-left:auto;color:#627b87!important}
+.earnings-ledger-card{overflow:hidden;padding:0;background:linear-gradient(145deg,rgba(194,228,245,.065),rgba(5,15,24,.58)),rgba(221,240,247,.03)}
+.earnings-ledger-heading{padding:16px 18px 13px}
+.earnings-ledger-heading .gantt-today{display:flex;align-items:center;gap:6px;font-size:9px}
+.earnings-ledger-scroll{overflow:auto}
+.earning-table-head,.earning-row{display:grid;grid-template-columns:minmax(200px,1.55fr) minmax(115px,.9fr) minmax(90px,.72fr) minmax(115px,.9fr) minmax(95px,.72fr) 28px;align-items:center;gap:12px;min-width:790px;padding:0 18px}
+.earning-table-head{height:34px;border-top:1px solid rgba(214,239,249,.09);border-bottom:1px solid rgba(214,239,249,.09);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.07));color:#76909d;font:7px 'DM Mono',monospace;letter-spacing:.7px}
+.earning-row{min-height:64px;border-bottom:1px solid rgba(211,237,247,.065);color:#b7cbd4;font-size:9px;transition:background .16s ease}
+.earning-row:last-child{border-bottom:0}
+.earning-row:hover{background:linear-gradient(90deg,rgba(149,222,237,.045),rgba(149,222,237,.012))}
+.earning-project-cell{display:flex;align-items:center;gap:9px;min-width:0}
+.earning-project-icon{display:grid;place-items:center;flex:0 0 auto;width:29px;height:29px;border:1px solid rgba(204,237,248,.17);border-radius:8px;background:linear-gradient(150deg,rgba(255,255,255,.14),rgba(0,0,0,.22)),linear-gradient(135deg,rgba(27,112,122,.54),rgba(8,28,39,.8));box-shadow:0 3px 7px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.2),inset 0 -1px rgba(0,0,0,.4);color:#8de9e5}
+.earning-project-cell>span:last-child{display:grid;gap:4px;min-width:0}
+.earning-project-cell b{overflow:hidden;color:#dcebf0;font-size:9px;font-weight:500;text-overflow:ellipsis;white-space:nowrap}
+.earning-project-cell small{overflow:hidden;color:#718995;font-size:7px;text-overflow:ellipsis;white-space:nowrap}
+.earning-client-cell,.earning-date-cell{overflow:hidden;color:#90a8b2;text-overflow:ellipsis;white-space:nowrap}
+.earning-amount-cell{color:#e0f2f5;font:500 10px 'DM Mono',monospace;white-space:nowrap}
+.earning-payment-status{display:inline-flex;align-items:center;gap:7px;width:max-content;padding:5px 8px;border:1px solid rgba(220,241,249,.12);border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(0,0,0,.18));box-shadow:inset 0 1px rgba(255,255,255,.1),inset 0 -1px rgba(0,0,0,.34);font-size:8px;white-space:nowrap}
+.earning-payment-status i{width:6px;height:6px;border:1px solid rgba(255,255,255,.56);border-radius:50%;box-shadow:inset 0 1px rgba(255,255,255,.85),0 0 7px 2px currentColor}
+.earning-payment-status.green{color:#83ffd2}.earning-payment-status.green i{background:radial-gradient(circle at 35% 25%,#fff,#4fffc2 45%,#087650)}
+.earning-payment-status.amber{color:#ffda91}.earning-payment-status.amber i{background:radial-gradient(circle at 35% 25%,#fff,#ffc45f 45%,#94611b)}
+.earning-payment-status.red{color:#ff9da0}.earning-payment-status.red i{background:radial-gradient(circle at 35% 25%,#fff,#ff6e78 45%,#8a1f36)}
+.earning-more{width:25px;height:25px}
+.earnings-ledger-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 18px;border-top:1px solid rgba(211,237,247,.075);color:#738d99;font-size:8px}
+.earnings-ledger-foot b{color:#a9c0c9;font-weight:500}
+.earnings-ledger-total{display:flex;gap:7px;align-items:center}.earnings-ledger-total b{color:#ccf6ec;font:500 10px 'DM Mono',monospace}
+@media(max-width:800px){.earnings-overview-grid{gap:8px}.earnings-overview-card{min-height:115px;padding:13px 9px 11px 45px}.earnings-overview-icon{left:9px;top:13px;width:27px;height:27px}.earnings-overview-card>b{font-size:18px}.earnings-overview-card>small{font-size:7px}.earnings-chart-card{padding:13px}.earnings-chart-svg{height:170px}.earnings-ledger-heading{align-items:flex-start;padding:13px}.earnings-ledger-heading .gantt-today{font-size:0}.earnings-ledger-heading .gantt-today svg{width:15px;height:15px}.earning-table-head,.earning-row{padding-left:12px;padding-right:12px}.earnings-ledger-foot{padding:10px 12px}}

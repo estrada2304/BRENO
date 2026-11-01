@@ -1,0 +1,59 @@
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+.meeting-calendar-panel{overflow:hidden;padding:0;background:linear-gradient(145deg,rgba(158,221,244,.105),rgba(13,34,48,.76) 42%,rgba(4,13,22,.84)),rgba(15,34,47,.64);backdrop-filter:blur(24px);border:1px solid rgba(205,239,251,.2);box-shadow:0 24px 58px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(0,0,0,.64),inset 0 0 35px rgba(97,207,236,.045)}
+.meeting-calendar-toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid rgba(216,241,251,.1);background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(0,0,0,.08))}
+.meeting-calendar-heading{display:flex;align-items:center;gap:11px;min-width:0}
+.meeting-calendar-heading h2{margin:0;color:#e4f5fb;font:500 17px 'Space Grotesk',sans-serif;text-transform:capitalize}
+.meeting-calendar-heading small{display:flex;align-items:center;gap:6px;margin-top:4px;color:#89a4b2;font-size:9px}
+.meeting-calendar-icon{display:grid;place-items:center;width:36px;height:36px;border:1px solid rgba(202,240,252,.24);border-radius:11px;color:#8fe7f3;background:linear-gradient(155deg,rgba(255,255,255,.19),rgba(0,0,0,.25)),linear-gradient(140deg,rgba(18,89,107,.8),rgba(8,31,46,.94));box-shadow:0 5px 12px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.3),inset 0 -2px rgba(0,0,0,.45)}
+.meeting-calendar-controls{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.meeting-calendar-controls .gantt-view{font-size:9px}
+.meeting-calendar-stage{height:600px;min-height:480px;padding:0 14px 14px;overflow:auto}
+.meeting-calendar-stage .rbc-calendar{height:100%;min-width:680px;color:#c4d7df;font-family:'DM Sans',sans-serif;font-size:10px}
+.meeting-calendar-stage .rbc-toolbar{display:none}
+.meeting-calendar-stage .rbc-header{padding:12px 5px;border:0;border-bottom:1px solid rgba(214,240,250,.12);color:#91adba;font:500 9px 'DM Mono',monospace;letter-spacing:.7px;text-transform:uppercase}
+.meeting-calendar-stage .rbc-month-view,.meeting-calendar-stage .rbc-time-view,.meeting-calendar-stage .rbc-agenda-view{overflow:hidden;border:1px solid rgba(212,239,250,.13);border-radius:11px;background:linear-gradient(145deg,rgba(8,22,32,.78),rgba(5,15,23,.88));box-shadow:inset 0 2px 9px rgba(0,0,0,.46),inset 0 1px 0 rgba(255,255,255,.055),0 7px 18px rgba(0,0,0,.17)}
+.meeting-calendar-stage .rbc-month-row+.rbc-month-row,.meeting-calendar-stage .rbc-day-bg+.rbc-day-bg,.meeting-calendar-stage .rbc-time-header-content,.meeting-calendar-stage .rbc-timeslot-group,.meeting-calendar-stage .rbc-time-content>*+*>*,.meeting-calendar-stage .rbc-agenda-view table.rbc-agenda-table tbody>tr>td{border-color:rgba(206,233,244,.075)}
+.meeting-calendar-stage .rbc-day-bg{background:linear-gradient(155deg,rgba(211,239,249,.025),rgba(4,16,24,.22));box-shadow:inset 0 2px 8px rgba(0,0,0,.24)}
+.meeting-calendar-stage .rbc-off-range-bg{background:linear-gradient(155deg,rgba(0,0,0,.12),rgba(4,13,21,.38));box-shadow:inset 0 2px 8px rgba(0,0,0,.34)}
+.meeting-calendar-stage .rbc-off-range .meeting-date-header{color:#526a77}
+.meeting-calendar-stage .rbc-today,.meeting-calendar-stage .rbc-day-bg.meeting-today-cell{background:linear-gradient(145deg,rgba(26,106,121,.16),rgba(9,42,55,.29));box-shadow:inset 0 0 0 1px rgba(80,223,235,.15),inset 0 2px 10px rgba(0,0,0,.26)}
+.meeting-calendar-stage .rbc-date-cell{padding:6px 8px}
+.meeting-calendar-stage .rbc-date-cell>a,.meeting-calendar-stage .rbc-date-cell>a:active,.meeting-calendar-stage .rbc-date-cell>a:visited{color:#c6d8df;text-decoration:none}
+.meeting-date-header{display:inline-flex;align-items:center;gap:6px;color:#bed0d8}
+.meeting-date-header.is-today{color:#a7fbef;font-weight:700;text-shadow:0 0 12px rgba(77,244,224,.27)}
+.today-led{display:inline-block;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#f1fffd,#44ffe1 45%,#00a88e);box-shadow:0 0 8px 2px rgba(0,255,210,.7),inset 0 1px 1px rgba(255,255,255,.9)}
+.meeting-calendar-stage .rbc-show-more{color:#8ee9ee;font-size:9px;text-shadow:0 0 8px rgba(69,234,245,.3)}
+.meeting-calendar-stage .rbc-event,.meeting-calendar-stage .rbc-day-slot .rbc-background-event{padding:0 2px;border:0;border-radius:6px;background:transparent;box-shadow:none}
+.meeting-calendar-stage .rbc-event:focus{outline:1px solid rgba(163,241,249,.65);outline-offset:1px}
+.meeting-event-pill{position:relative;display:flex;align-items:center;gap:5px;min-width:0;padding:5px 6px;border:1px solid rgba(223,246,252,.23);border-top-color:rgba(255,255,255,.62);border-bottom-color:rgba(0,0,0,.58);border-radius:5px;background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(0,0,0,.22)),linear-gradient(110deg,var(--event-edge),var(--event-base) 54%,var(--event-deep));box-shadow:0 3px 5px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 1px rgba(0,0,0,.38);color:var(--event-text);font-size:8px;line-height:1.25;overflow:hidden}
+.meeting-event-pill.amber{--event-edge:#b97d44;--event-base:#664323;--event-deep:#382819;--event-text:#ffe0b1;--event-led:#ffc279}
+.meeting-event-pill.cyan{--event-edge:#39889a;--event-base:#1b5261;--event-deep:#12323e;--event-text:#b4f4fa;--event-led:#69eaff}
+.meeting-event-pill.violet{--event-edge:#8161b1;--event-base:#392a53;--event-deep:#211a32;--event-text:#e1d3ff;--event-led:#bda0ff}
+.meeting-event-pill.green{--event-edge:#39876c;--event-base:#1a4d3d;--event-deep:#112c26;--event-text:#b4f8d4;--event-led:#67ffae}
+.meeting-event-led,.meeting-legend-led,.meeting-detail-led{flex:0 0 auto;width:6px;height:6px;border:1px solid rgba(255,255,255,.72);border-radius:50%;background:radial-gradient(circle at 35% 28%,#fff,var(--event-led) 52%,var(--event-edge));box-shadow:0 0 6px 1px var(--event-led),inset 0 1px rgba(255,255,255,.8)}
+.meeting-event-time{flex:0 0 auto;color:rgba(245,252,255,.76);font:7px 'DM Mono',monospace}
+.meeting-event-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.meeting-event-video{flex:0 0 auto;margin-left:auto;opacity:.86}
+.meeting-calendar-stage .rbc-time-gutter,.meeting-calendar-stage .rbc-label{color:#78909d;font:8px 'DM Mono',monospace}
+.meeting-calendar-stage .rbc-time-slot{border-top-color:rgba(201,229,239,.055)}
+.meeting-calendar-stage .rbc-current-time-indicator{height:2px;background:#46e6d4;box-shadow:0 0 7px rgba(70,230,212,.8)}
+.meeting-calendar-stage .rbc-current-time-indicator:before{position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:#8bfff1;box-shadow:0 0 8px 2px #1cddc5;content:''}
+.meeting-calendar-stage .rbc-agenda-view table.rbc-agenda-table{border:0;color:#bed0d8}
+.meeting-calendar-stage .rbc-agenda-view table.rbc-agenda-table thead>tr>th{border-color:rgba(206,233,244,.1);color:#8eaab6}
+.meeting-selected-detail{display:flex;align-items:center;gap:10px;margin:0 16px 12px;padding:11px 13px;border:1px solid rgba(208,239,250,.14);border-radius:9px;background:linear-gradient(145deg,rgba(220,244,251,.08),rgba(0,0,0,.19));box-shadow:inset 0 1px rgba(255,255,255,.08),inset 0 -1px rgba(0,0,0,.32)}
+.meeting-detail-led{width:8px;height:8px}
+.meeting-detail-led.amber,.meeting-legend-led.amber{--event-led:#ffc279;--event-edge:#b97d44}
+.meeting-detail-led.cyan,.meeting-legend-led.cyan{--event-led:#69eaff;--event-edge:#39889a}
+.meeting-detail-led.violet,.meeting-legend-led.violet{--event-led:#bda0ff;--event-edge:#8161b1}
+.meeting-detail-led.green,.meeting-legend-led.green{--event-led:#67ffae;--event-edge:#39876c}
+.meeting-detail-copy{display:grid;gap:4px;min-width:0;color:#e1f0f5;font-size:10px}
+.meeting-detail-copy small{display:flex;align-items:center;gap:5px;color:#8fa8b4;font-size:8px;text-transform:capitalize}
+.meeting-video-link{display:flex;align-items:center;gap:6px;margin-left:auto;padding:7px 10px;border:1px solid rgba(127,240,222,.29);border-radius:6px;background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(0,0,0,.25)),linear-gradient(120deg,rgba(14,83,81,.8),rgba(8,38,45,.8));box-shadow:0 3px 8px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.2),inset 0 -1px rgba(0,0,0,.5);color:#9affe3;text-decoration:none;font-size:8px;white-space:nowrap}
+.meeting-video-link:hover{filter:brightness(1.15);box-shadow:0 0 12px rgba(77,232,208,.15),inset 0 1px rgba(255,255,255,.25)}
+.meeting-calendar-legend{display:flex;align-items:center;gap:18px;min-height:44px;padding:0 18px;border-top:1px solid rgba(213,239,249,.09);color:#91aab6;font-size:9px}
+.meeting-calendar-legend>span:not(.meeting-legend-note){display:inline-flex;align-items:center;gap:6px}
+.meeting-legend-led{width:7px;height:7px}
+.meeting-legend-note{margin-left:auto;color:#637d8a;font-size:8px}
+@media(max-width:760px){.meeting-calendar-toolbar{align-items:flex-start;flex-direction:column;padding:13px}.meeting-calendar-controls{width:100%}.meeting-calendar-controls .header-divider{margin:0 2px}.meeting-calendar-stage{height:540px;padding:0 8px 8px}.meeting-calendar-legend{gap:10px;padding:9px 12px;flex-wrap:wrap}.meeting-legend-note{width:100%;margin-left:0}.meeting-selected-detail{align-items:flex-start;margin:0 9px 9px}.meeting-video-link{font-size:0}.meeting-video-link svg{width:15px;height:15px}}
+@media(prefers-reduced-motion:reduce){.today-led{animation:none!important}}

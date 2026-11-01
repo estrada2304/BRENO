@@ -1,0 +1,10 @@
+:root{--bg:#0a1421;--panel:rgba(21,43,60,.76);--panel-2:rgba(29,54,71,.8);--line:rgba(201,230,243,.19);--muted:#9aaebb;--soft:#c5d5de;--text:#edf7fa;--glass-v5:rgba(220,243,251,.1);--glass-v18:rgba(166,218,241,.16)}
+html,body{background:#0a1421}
+body{background:linear-gradient(128deg,#10243d 0%,#0a1421 49%,#0d252c 100%);background-attachment:fixed}
+.app-shell{background:radial-gradient(ellipse at 8% 2%,rgba(48,141,203,.32),transparent 40%),radial-gradient(ellipse at 90% 84%,rgba(34,190,191,.18),transparent 37%),radial-gradient(ellipse at 55% 45%,rgba(75,105,175,.11),transparent 54%),linear-gradient(133deg,#10243b 0%,#0a1421 55%,#0c2027 100%)}
+.app-shell:before,.app-shell:after{background:radial-gradient(ellipse at 23% 32%,rgba(43,137,207,.21),transparent 31%),radial-gradient(ellipse at 76% 65%,rgba(36,186,204,.16),transparent 34%)}
+.ambient{opacity:.2}
+.sidebar{background:linear-gradient(158deg,rgba(24,50,69,.94),rgba(9,23,37,.95) 72%);border-right-color:rgba(192,228,244,.22);box-shadow:inset -1px 0 rgba(255,255,255,.11),8px 0 34px rgba(0,0,0,.27)}
+.header{border-bottom-color:rgba(199,226,239,.16);background:rgba(16,36,53,.72);backdrop-filter:blur(18px) saturate(135%);-webkit-backdrop-filter:blur(18px) saturate(135%)}
+.dashboard-page:before{background:radial-gradient(ellipse,rgba(78,194,224,.19),rgba(101,126,220,.12) 44%,transparent 73%);filter:blur(42px)}
+@media(prefers-reduced-motion:reduce){.app-shell:before,.app-shell:after{animation:none}}
