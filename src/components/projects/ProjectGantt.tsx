@@ -161,7 +161,7 @@ export default function ProjectGantt() {
             })}
           </div>
         ) : (
-          <div className="project-gantt-empty"><BriefcaseBusiness size={18} /><b>No hay proyectos en este estado</b><small>Selecciona otro filtro para ver el resto de la planificación.</small></div>
+          <div className="project-gantt-empty"><BriefcaseBusiness size={18} /><b>{allProjects.length ? 'No hay proyectos en este estado' : 'Tu cronograma está listo'}</b><small>{allProjects.length ? 'Selecciona otro filtro para revisar la planificación.' : clients.length ? 'Crea el primer proyecto para planificar sus fases y entregas.' : 'Primero añade un cliente; después podrás crear su proyecto.'}</small>{clients.length > 0 && !allProjects.length && <button type="button" className="button-primary" onClick={() => setIsCreating(true)}>Crear primer proyecto</button>}</div>
         )}
 
         <div className="gantt-legend project-gantt-legend" aria-label="Leyenda de fases">

@@ -139,7 +139,7 @@ export default function EarningsPanel() {
     <div className="page-content inner-page earnings-panel-page">
       <div className="welcome-row">
         <div><div className="eyebrow"><span className="eyebrow-line" /> SALUD FINANCIERA</div><h1>Ganancias</h1><p className="page-intro">Cobros, facturas y próximos vencimientos del estudio.</p></div>
-        <button type="button" className="button-primary" onClick={() => setIsCreating(true)}><span aria-hidden="true">＋</span> Registrar ingreso</button>
+        <button type="button" className="button-primary" onClick={() => setIsCreating(true)} disabled={!projects.length} title={!projects.length ? 'Primero registra un proyecto' : undefined}><span aria-hidden="true">＋</span> Registrar ingreso</button>
       </div>
 
       <div className="earnings-overview-grid">

@@ -47,6 +47,16 @@ function cleanSampleData(value: Partial<WorkspaceData>): WorkspaceData {
   }
 }
 
+function deriveActivity(data: WorkspaceData): ActivityItem[] {
+  const entries: ActivityItem[] = [
+    ...data.clients.map((client): ActivityItem => ({ id: `activity-${client.id}`, kind: client.status === 'prospecto' ? 'prospecto' : 'cliente', title: client.status === 'prospecto' ? 'Prospecto añadido' : 'Cliente registrado', detail: `${client.companyName} · ${client.contactName}`, happenedAt: client.createdAt, relatedClientId: client.id })),
+    ...data.projects.map((project): ActivityItem => ({ id: `activity-${project.id}`, kind: 'proyecto', title: 'Proyecto planificado', detail: project.name, happenedAt: project.startDate, relatedClientId: project.clientId, relatedProjectId: project.id })),
+    ...data.meetings.filter((meeting) => Date.parse(meeting.startsAt) <= Date.now()).map((meeting): ActivityItem => ({ id: `activity-${meeting.id}`, kind: 'reunion', title: 'Reunión registrada', detail: meeting.title, happenedAt: meeting.startsAt, relatedClientId: meeting.clientId })),
+    ...data.earnings.map((earning): ActivityItem => ({ id: `activity-${earning.id}`, kind: 'ingreso', title: earning.status === 'pagado' ? 'Pago recibido' : 'Cobro pendiente registrado', detail: earning.description, happenedAt: earning.issuedAt, relatedClientId: earning.clientId, relatedProjectId: earning.projectId })),
+  ]
+  return entries.filter((item) => Number.isFinite(Date.parse(item.happenedAt))).sort((a, b) => Date.parse(b.happenedAt) - Date.parse(a.happenedAt)).slice(0, 8)
+}
+
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null)
 
 export function WorkspaceProvider({ userId, children }: { userId?: string; children: ReactNode }) {
@@ -117,6 +127,7 @@ export function WorkspaceProvider({ userId, children }: { userId?: string; child
 
   const value = useMemo<WorkspaceContextValue>(() => ({
     ...workspace,
+    activity: deriveActivity(workspace),
     ready,
     syncStatus,
     syncError,
