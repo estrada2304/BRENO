@@ -27,6 +27,10 @@ Para activar autenticación en otro entorno, copia `.env.example` a `.env.local`
 
 La interfaz no incluye una clave de servicio ni guarda contraseñas. La clave publishable/anon se usa en el navegador; las políticas de acceso y los datos privados deben protegerse del lado de Supabase.
 
+## Perfil de usuario
+
+Desde **Mi perfil** se puede actualizar el nombre, el cargo, el correo de acceso y la foto. Supabase confirma el cambio de correo antes de que la nueva dirección se vuelva la de inicio de sesión. Las fotos se guardan en el bucket privado `profile-avatars`, dentro de una carpeta por usuario; el límite es 5 MB y se aceptan JPG, PNG, WebP y AVIF. La migración `supabase/migrations/20261103170000_create_private_profile_avatars.sql` crea el bucket y aplica políticas RLS para restringir cada archivo a su propietario.
+
 ## Publicar en GitHub Pages
 
 El workflow `.github/workflows/deploy-pages.yml` compila y publica el sitio automáticamente al enviar cambios a `main` o `master`.
@@ -36,6 +40,8 @@ En el repo GitHub, configura:
 - Variable de Actions `VITE_SUPABASE_URL`.
 - Variable de Actions `VITE_SUPABASE_ANON_KEY` (es una clave publicable; nunca uses la clave `service_role`).
 - En Settings → Pages, selecciona GitHub Actions como fuente de despliegue.
+
+Antes de abrir el servicio a clientes, prueba registro y confirmación, recuperación y cambio de correo en la URL publicada; configura SMTP de producción y las URL permitidas de Supabase; activa protección contra contraseñas filtradas; y revisa periódicamente las políticas RLS y las copias de seguridad.
 
 El build adapta automáticamente la base de URL al nombre del repo y publica `404.html` para mantener las rutas de React Router al recargar una página.
 
@@ -52,3 +58,4 @@ pnpm preview
 ```
 
 Stack: React, TypeScript, Vite, Tailwind CSS, Framer Motion, React Router, Supabase Auth, react-big-calendar y gantt-task-react.
+

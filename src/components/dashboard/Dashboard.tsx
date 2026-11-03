@@ -9,6 +9,7 @@ import './dashboard-glass.css'
 type DashboardProps = {
   setPage: (page: AppPage) => void
   onAgent: () => void
+  userName?: string
 }
 
 const euro = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
@@ -31,7 +32,7 @@ function meetingAccent(type: string) {
   return 'lilac'
 }
 
-export default function Dashboard({ setPage, onAgent }: DashboardProps) {
+export default function Dashboard({ setPage, onAgent, userName = '' }: DashboardProps) {
   const { clients, projects, meetings, earnings, activity } = useWorkspace()
   const now = new Date()
   const activeProjects = projects.filter((project) => project.status === 'en-curso')
@@ -56,7 +57,7 @@ export default function Dashboard({ setPage, onAgent }: DashboardProps) {
       <div className="welcome-row">
         <div>
           <div className="eyebrow"><span className="eyebrow-line" /> {dateLabel}</div>
-          <h1>Buenos días, Breno <span className="wave">✳</span></h1>
+          <h1>Buenos días{userName ? `, ${userName.trim().split(/\s+/)[0]}` : ''} <span className="wave">✳</span></h1>
           <p className="page-intro">Aquí tienes lo que pasa en tu estudio hoy.</p>
         </div>
         <button type="button" className="button-primary" onClick={() => setPage(clients.length ? 'Proyectos' : 'Clientes')}>

@@ -24,6 +24,9 @@ type SidebarProps = {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
   profileEmail?: string
+  profileName?: string
+  profileAvatarUrl?: string
+  onOpenProfile: () => void
   collapsed: boolean
   onToggleCollapse: () => void
 }
@@ -56,7 +59,7 @@ function Brand() {
   )
 }
 
-export default function Sidebar({ onAgent, open, setOpen, profileEmail, collapsed, onToggleCollapse }: SidebarProps) {
+export default function Sidebar({ onAgent, open, setOpen, profileEmail, profileName, profileAvatarUrl, onOpenProfile, collapsed, onToggleCollapse }: SidebarProps) {
   return (
     <>
       <button
@@ -123,14 +126,14 @@ export default function Sidebar({ onAgent, open, setOpen, profileEmail, collapse
             <p>Tu agente BRENO está listo para ayudarte.</p>
             <button type="button" onClick={onAgent}>Habla con el agente <span aria-hidden="true">↗</span></button>
           </div>
-          <button type="button" className="nav-item settings-item">
-            <span className="nav-icon-button"><Settings2 size={15} /></span><span>Configuración</span>
+          <button type="button" className="nav-item settings-item" onClick={onOpenProfile} title={collapsed ? 'Mi perfil' : undefined}>
+            <span className="nav-icon-button"><Settings2 size={15} /></span><span>Mi perfil</span>
           </button>
-          <div className="profile-row">
-            <span className="avatar blue">BR</span>
-            <span className="profile-copy"><b>{profileEmail ? profileEmail.split('@')[0] : 'Breno Rivas'}</b><small>{profileEmail ?? 'Admin workspace'}</small></span>
+          <button type="button" className="profile-row profile-open" onClick={onOpenProfile} aria-label="Abrir mi perfil" title={collapsed ? 'Mi perfil' : undefined}>
+            {profileAvatarUrl ? <img className="avatar blue profile-avatar" src={profileAvatarUrl} alt="" /> : <span className="avatar blue">{profileName?.trim().charAt(0).toUpperCase() || profileEmail?.charAt(0).toUpperCase() || 'B'}</span>}
+            <span className="profile-copy"><b>{profileName || (profileEmail ? profileEmail.split('@')[0] : 'Mi perfil')}</b><small>{profileEmail ?? 'Completa tus datos'}</small></span>
             <MoreHorizontal size={17} />
-          </div>
+          </button>
         </div>
       </aside>
     </>

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
-import type { Session } from '@supabase/supabase-js'
+import type { Session, User } from '@supabase/supabase-js'
 import ClientsPage from './components/clients/ClientsPage'
 import Dashboard from './components/dashboard/Dashboard'
 import ProjectGantt from './components/projects/ProjectGantt'
 import MeetingCalendar from './components/calendar/MeetingCalendar'
 import EarningsPanel from './components/earnings/EarningsPanel'
 import BrenoAgent from './components/agent/BrenoAgent'
+import ProfilePanel from './components/profile/ProfilePanel'
 import Sidebar from './components/layout/Sidebar'
 import TopBar from './components/layout/TopBar'
 import { appPagePaths, getPageFromPath, type AppPage } from './components/layout/layout.types'
@@ -18,9 +19,10 @@ import { useWorkspace, WorkspaceProvider } from './lib/workspace'
 type AppLayoutContext = {
   navigateToPage: (page: AppPage) => void
   openAgent: () => void
+  profileName: string
 }
 
-type ApplicationRouterProps = { userEmail?: string; onSignOut?: () => void }
+type ApplicationRouterProps = { user?: User; onSignOut?: () => void }
 
 function AuthSetupScreen() {
   return (
@@ -72,27 +74,59 @@ function AuthGate() {
   if (window.location.hash.includes('type=recovery')) return <AuthScreen client={client} />
   if (!ready) return <main className="auth-screen"><div className="auth-panel"><div className="auth-kicker">CONECTANDO</div><h1>Preparando tu espacio…</h1></div></main>
   if (!session) return <AuthScreen client={client} />
-  return <WorkspaceProvider userId={session.user.id}><ApplicationRouter userEmail={session.user.email ?? ''} onSignOut={() => client.auth.signOut()} /></WorkspaceProvider>
+  return <WorkspaceProvider userId={session.user.id}><ApplicationRouter user={session.user} onSignOut={() => client.auth.signOut()} /></WorkspaceProvider>
 }
 
-function AppLayout({ userEmail, onSignOut }: ApplicationRouterProps) {
+function AppLayout({ user, onSignOut }: ApplicationRouterProps) {
   const workspaceState = useWorkspace()
   const location = useLocation()
   const navigate = useNavigate()
   const [agentOpen, setAgentOpen] = useState(false)
   const [mobileNav, setMobileNav] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [profile, setProfile] = useState(() => ({
+    fullName: String(user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? ''),
+    jobTitle: String(user?.user_metadata?.job_title ?? ''),
+    avatarPath: String(user?.user_metadata?.avatar_path ?? ''),
+  }))
+  const [profileAvatarUrl, setProfileAvatarUrl] = useState('')
   const page = getPageFromPath(location.pathname)
+
+  useEffect(() => {
+    const client = supabase
+    if (!profile.avatarPath || !client) {
+      setProfileAvatarUrl('')
+      return
+    }
+    let alive = true
+    const refreshAvatarUrl = () => {
+      void client.storage.from('profile-avatars').createSignedUrl(profile.avatarPath, 60 * 60).then(({ data, error }) => {
+        if (!alive) return
+        if (error) {
+          console.error('No se pudo cargar la foto de perfil.', error)
+          setProfileAvatarUrl('')
+          return
+        }
+        setProfileAvatarUrl(data.signedUrl)
+      })
+    }
+    refreshAvatarUrl()
+    const timer = window.setInterval(refreshAvatarUrl, 45 * 60 * 1000)
+    return () => { alive = false; window.clearInterval(timer) }
+  }, [profile.avatarPath])
+
   const context: AppLayoutContext = {
     navigateToPage: (nextPage) => navigate(appPagePaths[nextPage]),
     openAgent: () => setAgentOpen(true),
+    profileName: profile.fullName,
   }
 
   return (
     <div className="app-shell">
       <div className="ambient ambient-one" />
       <div className="ambient ambient-two" />
-      <Sidebar onAgent={context.openAgent} open={mobileNav} setOpen={setMobileNav} profileEmail={userEmail} collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed((value) => !value)} />
+      <Sidebar onAgent={context.openAgent} open={mobileNav} setOpen={setMobileNav} profileEmail={user?.email ?? ''} profileName={profile.fullName} profileAvatarUrl={profileAvatarUrl} onOpenProfile={() => setProfileOpen(true)} collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed((value) => !value)} />
       <main className={`main-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         <TopBar page={page} onOpenAgent={context.openAgent} onOpenMenu={() => setMobileNav(true)} onSignOut={onSignOut} syncStatus={workspaceState.syncStatus} syncError={workspaceState.syncError} />
         <AnimatePresence mode="wait" initial={false}>
@@ -102,19 +136,20 @@ function AppLayout({ userEmail, onSignOut }: ApplicationRouterProps) {
         </AnimatePresence>
       </main>
       <BrenoAgent open={agentOpen} onClose={() => setAgentOpen(false)} />
+      {profileOpen && <ProfilePanel userId={user?.id ?? ''} email={user?.email ?? ''} fullName={profile.fullName} jobTitle={profile.jobTitle} avatarPath={profile.avatarPath} avatarUrl={profileAvatarUrl} onClose={() => setProfileOpen(false)} onSaved={(nextProfile) => setProfile(nextProfile)} />}
     </div>
   )
 }
 
 function DashboardRoute() {
-  const { navigateToPage, openAgent } = useOutletContext<AppLayoutContext>()
-  return <Dashboard setPage={navigateToPage} onAgent={openAgent} />
+  const { navigateToPage, openAgent, profileName } = useOutletContext<AppLayoutContext>()
+  return <Dashboard setPage={navigateToPage} onAgent={openAgent} userName={profileName} />
 }
 
-function ApplicationRouter({ userEmail = '', onSignOut }: ApplicationRouterProps) {
+function ApplicationRouter({ user, onSignOut }: ApplicationRouterProps) {
   return (
     <Routes>
-      <Route element={<AppLayout userEmail={userEmail} onSignOut={onSignOut} />}>
+      <Route element={<AppLayout user={user} onSignOut={onSignOut} />}>
         <Route index element={<Navigate to={appPagePaths.Dashboard} replace />} />
         <Route path={appPagePaths.Dashboard} element={<DashboardRoute />} />
         <Route path={appPagePaths.Clientes} element={<ClientsPage />} />
