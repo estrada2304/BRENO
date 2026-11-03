@@ -81,6 +81,7 @@ function AppLayout({ userEmail, onSignOut }: ApplicationRouterProps) {
   const navigate = useNavigate()
   const [agentOpen, setAgentOpen] = useState(false)
   const [mobileNav, setMobileNav] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const page = getPageFromPath(location.pathname)
   const context: AppLayoutContext = {
     navigateToPage: (nextPage) => navigate(appPagePaths[nextPage]),
@@ -91,8 +92,8 @@ function AppLayout({ userEmail, onSignOut }: ApplicationRouterProps) {
     <div className="app-shell">
       <div className="ambient ambient-one" />
       <div className="ambient ambient-two" />
-      <Sidebar onAgent={context.openAgent} open={mobileNav} setOpen={setMobileNav} profileEmail={userEmail} />
-      <main className="main-shell">
+      <Sidebar onAgent={context.openAgent} open={mobileNav} setOpen={setMobileNav} profileEmail={userEmail} collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed((value) => !value)} />
+      <main className={`main-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         <TopBar page={page} onOpenAgent={context.openAgent} onOpenMenu={() => setMobileNav(true)} onSignOut={onSignOut} syncStatus={workspaceState.syncStatus} syncError={workspaceState.syncError} />
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={location.pathname} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: .2 }}>

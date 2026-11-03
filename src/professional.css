@@ -82,3 +82,30 @@ h1{color:#1c1f2a;text-shadow:none;letter-spacing:-.9px}h2,h3{color:#252834}.page
 @media(max-width:800px){.sidebar{background:#fff;box-shadow:10px 0 30px rgba(25,31,52,.12)}.sidebar-scrim.show{background:rgba(36,41,58,.24);backdrop-filter:blur(3px)}.header{background:rgba(255,255,255,.94)}.right-column{background:transparent}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
+/* Sidebar: clear selection and a compact desktop mode. */
+.sidebar,.main-shell{transition:width .22s ease,margin-left .22s ease}
+.sidebar-collapse-toggle{display:grid;flex:0 0 28px;width:28px;height:28px;place-items:center;border:1px solid #e8eaf0;background:#fafbfc;color:#707688}
+.sidebar-collapse-toggle:hover{background:#eef0ff;color:#4f5ec9}
+.side-close{display:none}
+.sidebar .side-nav .nav-item{border:1px solid transparent;border-radius:9px;color:#626879;font-weight:500;transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease}
+.sidebar .side-nav .nav-item:hover{background:#f5f6fb;color:#353a4a}
+.sidebar .side-nav .nav-item.active{color:#3948b5;background:linear-gradient(100deg,#eef0ff,#f6f7ff);border-color:#dfe3ff;box-shadow:inset 3px 0 #5968d5,0 2px 7px rgba(70,81,170,.06);font-weight:650}
+.sidebar .side-nav .nav-item.active>span:not(.nav-icon-button):not(.nav-item-led){color:#3948b5}
+.sidebar .side-nav .nav-item.active .nav-icon-button{background:#e1e5ff;color:#4d5dcc}
+.sidebar .side-nav .nav-item.active .nav-icon-button svg{color:#4d5dcc}
+.sidebar .side-nav .nav-item.active .nav-item-led{background:#5968d5;box-shadow:0 0 0 3px rgba(89,104,213,.13)}
+.sidebar-collapsed.sidebar{width:76px;padding-left:12px;padding-right:12px}
+.sidebar-collapsed.sidebar .side-top{justify-content:center;padding:0;margin-bottom:26px}
+.sidebar-collapsed.sidebar .brand-name,.sidebar-collapsed.sidebar .brand-tag{display:none}
+.sidebar-collapsed.sidebar .sidebar-collapse-toggle{position:absolute;right:7px;top:24px;width:24px;height:24px;flex-basis:24px;background:#fff;border:0}
+.sidebar-collapsed.sidebar .brand{margin-top:32px}
+.sidebar-collapsed.sidebar .search-shortcut{justify-content:center;padding:9px 0;margin:0 0 24px}
+.sidebar-collapsed.sidebar .search-shortcut>span,.sidebar-collapsed.sidebar .search-shortcut>kbd,.sidebar-collapsed.sidebar .nav-label,.sidebar-collapsed.sidebar .nav-item>span:not(.nav-icon-button):not(.nav-item-led):not(.live-indicator),.sidebar-collapsed.sidebar .side-tip,.sidebar-collapsed.sidebar .profile-copy,.sidebar-collapsed.sidebar .profile-row>svg{display:none}
+.sidebar-collapsed.sidebar .nav-group{margin-bottom:15px}
+.sidebar-collapsed.sidebar .side-nav .nav-item{justify-content:center;gap:0;padding:0;height:40px}
+.sidebar-collapsed.sidebar .side-nav .nav-icon-button{width:30px;height:30px;display:grid;place-items:center;border-radius:8px}
+.sidebar-collapsed.sidebar .side-nav .nav-item-led{position:absolute;right:5px;top:5px;width:6px;height:6px;margin:0}
+.sidebar-collapsed.sidebar .profile-row{justify-content:center;padding:12px 0 0}
+.sidebar-collapsed.sidebar .main-shell,.main-shell.sidebar-collapsed{margin-left:76px}
+@media(max-width:800px){.sidebar-collapse-toggle{display:none}.sidebar.sidebar-collapsed{width:246px;padding:25px 17px 16px;transform:translateX(-100%)}.sidebar.sidebar-collapsed.sidebar-open{transform:translateX(0)}.sidebar.sidebar-collapsed .side-top{justify-content:space-between;padding:0 6px;margin-bottom:32px}.sidebar.sidebar-collapsed .brand-name,.sidebar.sidebar-collapsed .brand-tag,.sidebar.sidebar-collapsed .search-shortcut>span,.sidebar.sidebar-collapsed .search-shortcut>kbd,.sidebar.sidebar-collapsed .nav-label,.sidebar.sidebar-collapsed .nav-item>span:not(.nav-icon-button):not(.nav-item-led):not(.live-indicator),.sidebar.sidebar-collapsed .side-tip,.sidebar.sidebar-collapsed .profile-copy,.sidebar.sidebar-collapsed .profile-row>svg{display:initial}.sidebar.sidebar-collapsed .brand{margin-top:0}.sidebar.sidebar-collapsed .search-shortcut{justify-content:flex-start;padding:9px;margin:15px 0 26px}.sidebar.sidebar-collapsed .nav-group{margin-bottom:24px}.sidebar.sidebar-collapsed .side-nav .nav-item{justify-content:flex-start;gap:10px;padding:0 9px;height:35px}.sidebar.sidebar-collapsed .side-nav .nav-icon-button{width:auto;height:auto;background:transparent}.sidebar.sidebar-collapsed .side-nav .nav-item-led{position:static;margin-left:auto}.sidebar.sidebar-collapsed .profile-row{justify-content:flex-start;padding:13px 4px 0}.main-shell.sidebar-collapsed{margin-left:0}}
+

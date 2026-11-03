@@ -3,11 +3,12 @@ import { NavLink } from 'react-router-dom'
 import {
   BriefcaseBusiness,
   CalendarDays,
-  ChevronDown,
   Command,
   CreditCard,
   LayoutDashboard,
   MoreHorizontal,
+  PanelLeftClose,
+  PanelLeftOpen,
   Search,
   Settings2,
   Sparkles,
@@ -23,6 +24,8 @@ type SidebarProps = {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
   profileEmail?: string
+  collapsed: boolean
+  onToggleCollapse: () => void
 }
 
 const navGroups: { title: string; items: [AppPage, LucideIcon][] }[] = [
@@ -53,7 +56,7 @@ function Brand() {
   )
 }
 
-export default function Sidebar({ onAgent, open, setOpen, profileEmail }: SidebarProps) {
+export default function Sidebar({ onAgent, open, setOpen, profileEmail, collapsed, onToggleCollapse }: SidebarProps) {
   return (
     <>
       <button
@@ -62,21 +65,18 @@ export default function Sidebar({ onAgent, open, setOpen, profileEmail }: Sideba
         className={`sidebar-scrim ${open ? 'show' : ''}`}
         onClick={() => setOpen(false)}
       />
-      <aside className={`sidebar ${open ? 'sidebar-open' : ''}`} aria-label="Navegación principal">
+      <aside className={`sidebar ${open ? 'sidebar-open' : ''} ${collapsed ? 'sidebar-collapsed' : ''}`} aria-label="Navegación principal">
         <div className="side-top">
           <Brand />
+          <button type="button" className="icon-button sidebar-collapse-toggle" aria-label={collapsed ? 'Expandir menú' : 'Plegar menú'} title={collapsed ? 'Expandir menú' : 'Plegar menú'} onClick={onToggleCollapse}>
+            {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+          </button>
           <button type="button" className="icon-button side-close" aria-label="Cerrar menú" onClick={() => setOpen(false)}>
             <X size={16} />
           </button>
         </div>
 
-        <button type="button" className="workspace">
-          <span className="workspace-icon">B</span>
-          <span className="workspace-copy"><b>Breno Studio</b><small>Plan Pro <span>↗</span></small></span>
-          <ChevronDown size={14} className="workspace-chevron" />
-        </button>
-
-        <button type="button" className="search-shortcut">
+        <button type="button" className="search-shortcut" title="Buscar">
           <Search size={15} />
           <span>Buscar cualquier cosa...</span>
           <kbd><Command size={10} /> K</kbd>
@@ -93,13 +93,12 @@ export default function Sidebar({ onAgent, open, setOpen, profileEmail }: Sideba
                     to={appPagePaths[label]}
                     end
                     className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    title={collapsed ? label : undefined}
                     onClick={() => setOpen(false)}
                   >
                     <NavLinkIcon Icon={Icon} />
                     <span>{label}</span>
                     <NavLinkLed />
-                    {label === 'Clientes' && <span className="nav-count">12</span>}
-                    {label === 'Proyectos' && <span className="nav-count">04</span>}
                   </NavLink>
                 )
               })}
@@ -108,7 +107,7 @@ export default function Sidebar({ onAgent, open, setOpen, profileEmail }: Sideba
 
           <div className="nav-group">
             <span className="nav-label">ASISTENTE</span>
-            <button type="button" className="nav-item agent-link" onClick={() => { onAgent(); setOpen(false) }}>
+            <button type="button" className="nav-item agent-link" title={collapsed ? 'Agente BRENO' : undefined} onClick={() => { onAgent(); setOpen(false) }}>
               <span className="nav-icon-button agent-nav-icon"><Sparkles size={14} /></span>
               <span>Agente BRENO</span>
               <span className="live-indicator" aria-label="Agente disponible" />
@@ -145,3 +144,4 @@ function NavLinkIcon({ Icon }: { Icon: LucideIcon }) {
 function NavLinkLed() {
   return <span className="nav-item-led" aria-label="Sección activa" />
 }
+
