@@ -3,3 +3,6 @@
 .side-nav .nav-item.active .nav-item-led{visibility:visible}
 .header .sign-out-button{color:#9ab5c1}
 .header .sign-out-button:hover{border-color:rgba(255,171,174,.32);color:#ffc0c2;box-shadow:0 0 11px rgba(255,128,144,.12),inset 0 1px rgba(255,255,255,.2)}
+.workspace-sync{display:inline-flex;align-items:center;gap:6px;color:#88a3ad;font-size:9px;white-space:nowrap}.workspace-sync i{width:6px;height:6px;border-radius:50%;background:#7ba7b5;box-shadow:0 0 6px currentColor}.workspace-sync.saved{color:#75e8c1}.workspace-sync.saved i{background:#47efb1}.workspace-sync.saving{color:#f1c16c}.workspace-sync.saving i{background:#ffc45d}.workspace-sync.error{color:#ff9399}.workspace-sync.error i{background:#ff5969}
+@media(max-width:800px){.workspace-sync{display:none}}
+

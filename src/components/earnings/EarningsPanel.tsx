@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowDownRight, ArrowUpRight, CalendarDays, Clock3, CreditCard, MoreHorizontal, Plus, WalletCards, X } from 'lucide-react'
+import { ArrowDownRight, ArrowUpRight, CalendarDays, Clock3, CreditCard, MoreHorizontal, Pencil, Plus, Trash2, WalletCards, X } from 'lucide-react'
 import type { Earning, PaymentStatus } from '../../types'
 import { useWorkspace } from '../../lib/workspace'
 import './earnings-panel.css'
@@ -11,28 +11,28 @@ const euro = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR'
 const statusLabels: Record<PaymentStatus, string> = { pagado: 'Pagado', pendiente: 'Pendiente', vencido: 'Vencido' }
 const statusColors: Record<PaymentStatus, string> = { pagado: 'green', pendiente: 'amber', vencido: 'red' }
 
-function EarningForm({ projects, clients, onClose, onCreate }: { projects: ReturnType<typeof useWorkspace>['projects']; clients: ReturnType<typeof useWorkspace>['clients']; onClose: () => void; onCreate: (earning: Earning) => void }) {
-  const [projectId, setProjectId] = useState(projects[0]?.id ?? '')
-  const [description, setDescription] = useState('')
-  const [amount, setAmount] = useState('')
-  const [dueAt, setDueAt] = useState('')
+function EarningForm({ projects, clients, onClose, onSave, initial }: { projects: ReturnType<typeof useWorkspace>['projects']; clients: ReturnType<typeof useWorkspace>['clients']; onClose: () => void; onSave: (earning: Earning) => void; initial?: Earning }) {
+  const [projectId, setProjectId] = useState(initial?.projectId ?? projects[0]?.id ?? '')
+  const [description, setDescription] = useState(initial?.description ?? '')
+  const [amount, setAmount] = useState(initial ? String(initial.amount) : '')
+  const [dueAt, setDueAt] = useState(initial?.dueAt.slice(0, 10) ?? '')
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const project = projects.find((item) => item.id === projectId)
     if (!project || !dueAt) return
-    onCreate({ id: `earning-${Date.now()}`, projectId, clientId: project.clientId, description: description.trim(), amount: Number(amount) || 0, currency: 'EUR', status: 'pendiente', issuedAt: new Date().toISOString(), dueAt: new Date(`${dueAt}T23:59:00`).toISOString(), invoiceNumber: `BR-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}` })
+    onSave({ id: initial?.id ?? `earning-${Date.now()}`, projectId, clientId: project.clientId, description: description.trim(), amount: Number(amount) || 0, currency: 'EUR', status: initial?.status ?? 'pendiente', issuedAt: initial?.issuedAt ?? new Date().toISOString(), dueAt: new Date(`${dueAt}T23:59:00`).toISOString(), paidAt: initial?.paidAt, invoiceNumber: initial?.invoiceNumber ?? `BR-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}` })
     onClose()
   }
 
   return <motion.div className="client-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
     <motion.section className="card client-modal" role="dialog" aria-modal="true" aria-labelledby="earning-modal-title" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
-      <div className="client-modal-head"><div><div className="section-kicker"><span className="section-dot" /> REGISTRO FINANCIERO</div><h2 id="earning-modal-title">Registrar ingreso</h2></div><button type="button" className="icon-button" aria-label="Cerrar formulario" onClick={onClose}><X size={16} /></button></div>
+      <div className="client-modal-head"><div><div className="section-kicker"><span className="section-dot" /> REGISTRO FINANCIERO</div><h2 id="earning-modal-title">{initial ? 'Editar ingreso' : 'Registrar ingreso'}</h2></div><button type="button" className="icon-button" aria-label="Cerrar formulario" onClick={onClose}><X size={16} /></button></div>
       <form className="client-form" onSubmit={submit}>
         <label>Proyecto<select required value={projectId} onChange={(event) => setProjectId(event.target.value)}><option value="" disabled>{projects.length ? 'Selecciona un proyecto' : 'Crea primero un proyecto'}</option>{projects.map((project) => <option key={project.id} value={project.id}>{project.name} · {clients.find((client) => client.id === project.clientId)?.companyName}</option>)}</select></label>
         <label>Concepto<input autoFocus required maxLength={120} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Hito de desarrollo" /></label>
         <div className="client-form-row"><label>Importe (€)<input required min="0.01" step="0.01" type="number" value={amount} onChange={(event) => setAmount(event.target.value)} /></label><label>Fecha de cobro<input required type="date" value={dueAt} onChange={(event) => setDueAt(event.target.value)} /></label></div>
-        <div className="client-form-actions"><button type="button" className="gantt-today" onClick={onClose}>Cancelar</button><button type="submit" className="button-primary" disabled={!projects.length}><Plus size={14} /> Guardar ingreso</button></div>
+        <div className="client-form-actions"><button type="button" className="gantt-today" onClick={onClose}>Cancelar</button><button type="submit" className="button-primary" disabled={!projects.length}><Plus size={14} /> {initial ? 'Guardar cambios' : 'Guardar ingreso'}</button></div>
       </form>
     </motion.section>
   </motion.div>
@@ -105,7 +105,7 @@ function MonthlyChart({ data }: { data: MonthlyIncome[] }) {
   )
 }
 
-function EarningRow({ earning, projects, clients, onToggleStatus }: { earning: Earning; projects: ReturnType<typeof useWorkspace>['projects']; clients: ReturnType<typeof useWorkspace>['clients']; onToggleStatus: () => void }) {
+function EarningRow({ earning, projects, clients, onToggleStatus, onDelete, onEdit }: { earning: Earning; projects: ReturnType<typeof useWorkspace>['projects']; clients: ReturnType<typeof useWorkspace>['clients']; onToggleStatus: () => void; onDelete: () => void; onEdit: () => void }) {
   const project = projects.find(({ id }) => id === earning.projectId)
   const client = clients.find(({ id }) => id === earning.clientId)
   const date = earning.status === 'pagado' && earning.paidAt ? earning.paidAt : earning.dueAt
@@ -116,7 +116,7 @@ function EarningRow({ earning, projects, clients, onToggleStatus }: { earning: E
       <b className="earning-amount-cell">{euro.format(earning.amount)}</b>
       <span className="earning-date-cell">{new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(date))}</span>
       <PaymentLed status={earning.status} />
-      <button type="button" className="icon-button earning-more" aria-label={`Cambiar estado de ${earning.invoiceNumber}`} title="Marcar como pagado o pendiente" onClick={onToggleStatus}><MoreHorizontal size={16} /></button>
+      <span className="earning-actions"><button type="button" className="icon-button" aria-label={`Editar ${earning.invoiceNumber}`} title="Editar ingreso" onClick={onEdit}><Pencil size={14} /></button><button type="button" className="icon-button earning-more" aria-label={`Cambiar estado de ${earning.invoiceNumber}`} title="Marcar como pagado o pendiente" onClick={onToggleStatus}><MoreHorizontal size={16} /></button><button type="button" className="icon-button" aria-label={`Eliminar ${earning.invoiceNumber}`} title="Eliminar ingreso" onClick={onDelete}><Trash2 size={14} /></button></span>
     </div>
   )
 }
@@ -124,6 +124,7 @@ function EarningRow({ earning, projects, clients, onToggleStatus }: { earning: E
 export default function EarningsPanel() {
   const { earnings, projects, clients, updateWorkspace } = useWorkspace()
   const [isCreating, setIsCreating] = useState(false)
+  const [editing, setEditing] = useState<Earning | null>(null)
   const totals = useMemo(() => earnings.reduce((acc, earning) => {
     acc[earning.status] += earning.amount
     acc[`${earning.status}Count`] += 1
@@ -161,16 +162,17 @@ export default function EarningsPanel() {
         <MonthlyChart data={chartData} />
         <div className="earnings-chart-legend"><span><i className="chart-legend-led paid" />Cobrado</span><span><i className="chart-legend-led pending" />Pendiente</span><span className="earnings-chart-period">Últimos 6 meses</span></div>
       </section>
-      <AnimatePresence>{isCreating && <EarningForm projects={projects} clients={clients} onClose={() => setIsCreating(false)} onCreate={(earning) => updateWorkspace((current) => ({ ...current, earnings: [earning, ...current.earnings] }))} />}</AnimatePresence>
+      <AnimatePresence>{isCreating && <EarningForm projects={projects} clients={clients} onClose={() => setIsCreating(false)} onSave={(earning) => updateWorkspace((current) => ({ ...current, earnings: [earning, ...current.earnings] }))} />}{editing && <EarningForm projects={projects} clients={clients} initial={editing} onClose={() => setEditing(null)} onSave={(earning) => updateWorkspace((current) => ({ ...current, earnings: current.earnings.map((item) => item.id === earning.id ? earning : item) }))} />}</AnimatePresence>
 
       <section className="card earnings-ledger-card">
         <div className="earnings-ledger-heading"><div><div className="section-kicker"><span className="section-dot" /> MOVIMIENTOS</div><h2>Ingresos por proyecto</h2><p>{earnings.length} facturas · {nextDue ? `próximo cobro ${new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short' }).format(new Date(nextDue.dueAt))}` : 'sin vencimientos próximos'}</p></div><button type="button" className="gantt-today">Todas las facturas <ArrowUpRight size={13} /></button></div>
         <div className="earnings-ledger-scroll">
           <div className="earning-table-head"><span>PROYECTO / FACTURA</span><span>CLIENTE</span><span>IMPORTE</span><span>FECHA DE COBRO</span><span>ESTADO</span><span /></div>
-          {earnings.map((earning) => <EarningRow earning={earning} projects={projects} clients={clients} key={earning.id} onToggleStatus={() => updateWorkspace((current) => ({ ...current, earnings: current.earnings.map((item) => item.id === earning.id ? item.status === 'pagado' ? { ...item, status: 'pendiente', paidAt: undefined } : { ...item, status: 'pagado', paidAt: new Date().toISOString() } : item) }))} />)}
+          {earnings.length ? earnings.map((earning) => <EarningRow earning={earning} projects={projects} clients={clients} key={earning.id} onEdit={() => setEditing(earning)} onToggleStatus={() => updateWorkspace((current) => ({ ...current, earnings: current.earnings.map((item) => item.id === earning.id ? item.status === 'pagado' ? { ...item, status: 'pendiente', paidAt: undefined } : { ...item, status: 'pagado', paidAt: new Date().toISOString() } : item) }))} onDelete={() => { if (window.confirm(`¿Eliminar el ingreso ${earning.invoiceNumber}?`)) updateWorkspace((current) => ({ ...current, earnings: current.earnings.filter((item) => item.id !== earning.id) })) }} />) : <div className="client-empty-state"><span className="empty-icon"><CreditCard size={18} /></span><b>Aún no hay movimientos</b><small>Registra un ingreso cuando tengas un proyecto y un cobro que seguir.</small></div>}
         </div>
         <div className="earnings-ledger-foot"><span>Mostrando <b>{earnings.length}</b> de <b>{earnings.length}</b> movimientos</span><span className="earnings-ledger-total">Total facturado <b>{euro.format(earnings.reduce((sum, earning) => sum + earning.amount, 0))}</b></span></div>
       </section>
     </div>
   )
 }
+

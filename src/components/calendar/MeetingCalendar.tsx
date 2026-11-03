@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { addDays, addMonths, addWeeks, format, getDay, parse, startOfWeek } from 'date-fns'
 import { es } from 'date-fns/locale/es'
 import { Calendar, dateFnsLocalizer, type Event, type View } from 'react-big-calendar'
-import { ArrowLeft, ArrowRight, CalendarDays, Clock3, Plus, Video, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CalendarDays, Clock3, Pencil, Plus, Trash2, Video, X } from 'lucide-react'
 import type { Meeting, MeetingType } from '../../types'
 import { useWorkspace } from '../../lib/workspace'
 import './meeting-calendar.css'
@@ -69,30 +69,30 @@ function DateHeader({ date, label }: { date: Date; label: string }) {
   )
 }
 
-function MeetingForm({ clients, onClose, onCreate }: { clients: ReturnType<typeof useWorkspace>['clients']; onClose: () => void; onCreate: (meeting: Meeting) => void }) {
-  const [title, setTitle] = useState('')
-  const [clientId, setClientId] = useState('')
-  const [type, setType] = useState<MeetingType>('seguimiento')
-  const [startsAt, setStartsAt] = useState('')
-  const [videoCallUrl, setVideoCallUrl] = useState('')
+function MeetingForm({ clients, onClose, onSave, initial }: { clients: ReturnType<typeof useWorkspace>['clients']; onClose: () => void; onSave: (meeting: Meeting) => void; initial?: Meeting }) {
+  const [title, setTitle] = useState(initial?.title ?? '')
+  const [clientId, setClientId] = useState(initial?.clientId ?? '')
+  const [type, setType] = useState<MeetingType>(initial?.type ?? 'seguimiento')
+  const [startsAt, setStartsAt] = useState(initial ? format(new Date(initial.startsAt), "yyyy-MM-dd'T'HH:mm") : '')
+  const [videoCallUrl, setVideoCallUrl] = useState(initial?.videoCallUrl ?? '')
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const start = new Date(startsAt)
     if (Number.isNaN(start.getTime())) return
-    onCreate({ id: `meeting-${Date.now()}`, title: title.trim(), clientId: clientId || undefined, type, startsAt: start.toISOString(), endsAt: new Date(start.getTime() + 30 * 60_000).toISOString(), videoCallUrl: videoCallUrl.trim() || undefined })
+    onSave({ id: initial?.id ?? `meeting-${Date.now()}`, title: title.trim(), clientId: clientId || undefined, type, startsAt: start.toISOString(), endsAt: new Date(start.getTime() + 30 * 60_000).toISOString(), videoCallUrl: videoCallUrl.trim() || undefined, projectId: initial?.projectId, notes: initial?.notes })
     onClose()
   }
 
   return <motion.div className="client-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
     <motion.section className="card client-modal" role="dialog" aria-modal="true" aria-labelledby="meeting-modal-title" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
-      <div className="client-modal-head"><div><div className="section-kicker"><span className="section-dot" /> COORDINACIÓN</div><h2 id="meeting-modal-title">Nueva reunión</h2></div><button type="button" className="icon-button" aria-label="Cerrar formulario" onClick={onClose}><X size={16} /></button></div>
+      <div className="client-modal-head"><div><div className="section-kicker"><span className="section-dot" /> COORDINACIÓN</div><h2 id="meeting-modal-title">{initial ? 'Editar reunión' : 'Nueva reunión'}</h2></div><button type="button" className="icon-button" aria-label="Cerrar formulario" onClick={onClose}><X size={16} /></button></div>
       <form className="client-form" onSubmit={submit}>
         <label>Asunto<input autoFocus required maxLength={100} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Revisión de propuesta" /></label>
         <div className="client-form-row"><label>Cliente<select value={clientId} onChange={(event) => setClientId(event.target.value)}><option value="">Sin cliente</option>{clients.map((client) => <option value={client.id} key={client.id}>{client.companyName}</option>)}</select></label><label>Tipo<select value={type} onChange={(event) => setType(event.target.value as MeetingType)}>{Object.entries(categoryLabels).map(([key, label]) => <option value={key} key={key}>{label}</option>)}</select></label></div>
         <label>Fecha y hora<input required type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /></label>
         <label>Enlace de videollamada<input type="url" value={videoCallUrl} onChange={(event) => setVideoCallUrl(event.target.value)} placeholder="https://…" /></label>
-        <div className="client-form-actions"><button type="button" className="gantt-today" onClick={onClose}>Cancelar</button><button type="submit" className="button-primary"><Plus size={14} /> Guardar reunión</button></div>
+        <div className="client-form-actions"><button type="button" className="gantt-today" onClick={onClose}>Cancelar</button><button type="submit" className="button-primary"><Plus size={14} /> {initial ? 'Guardar cambios' : 'Guardar reunión'}</button></div>
       </form>
     </motion.section>
   </motion.div>
@@ -104,6 +104,7 @@ export default function MeetingCalendar() {
   const [view, setView] = useState<View>('month')
   const [selected, setSelected] = useState<MeetingEvent | null>(null)
   const [isCreating, setIsCreating] = useState(false)
+  const [editing, setEditing] = useState<Meeting | null>(null)
   const events = useMemo(() => meetings.map((meeting) => toEvent(meeting, clients)), [meetings, clients])
   const today = new Date()
   const title = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(date)
@@ -184,6 +185,8 @@ export default function MeetingCalendar() {
               <small><Clock3 size={12} /> {format(selected.start as Date, "EEEE d 'de' MMMM · HH:mm", { locale: es })} · {selected.clientName}</small>
             </div>
             {selected.meeting.videoCallUrl && <a className="meeting-video-link" href={selected.meeting.videoCallUrl} target="_blank" rel="noreferrer"><Video size={13} /> Abrir videollamada <ArrowRight size={12} /></a>}
+            <button type="button" className="icon-button" aria-label={`Editar reunión ${selected.title}`} title="Editar reunión" onClick={() => { setEditing(selected.meeting); setSelected(null) }}><Pencil size={14} /></button>
+            <button type="button" className="icon-button" aria-label={`Eliminar reunión ${selected.title}`} title="Eliminar reunión" onClick={() => { if (window.confirm(`¿Eliminar la reunión ${selected.title}?`)) { updateWorkspace((current) => ({ ...current, meetings: current.meetings.filter((item) => item.id !== selected.meeting.id) })); setSelected(null) } }}><Trash2 size={14} /></button>
           </div>
         )}
 
@@ -192,7 +195,8 @@ export default function MeetingCalendar() {
           <span className="meeting-legend-note">Hora local · selecciona una reunión para ver el enlace</span>
         </div>
       </section>
-      <AnimatePresence>{isCreating && <MeetingForm clients={clients} onClose={() => setIsCreating(false)} onCreate={(meeting) => updateWorkspace((current) => ({ ...current, meetings: [...current.meetings, meeting] }))} />}</AnimatePresence>
+      <AnimatePresence>{isCreating && <MeetingForm clients={clients} onClose={() => setIsCreating(false)} onSave={(meeting) => updateWorkspace((current) => ({ ...current, meetings: [...current.meetings, meeting] }))} />}{editing && <MeetingForm clients={clients} initial={editing} onClose={() => setEditing(null)} onSave={(meeting) => updateWorkspace((current) => ({ ...current, meetings: current.meetings.map((item) => item.id === meeting.id ? meeting : item) }))} />}</AnimatePresence>
     </div>
   )
 }
+

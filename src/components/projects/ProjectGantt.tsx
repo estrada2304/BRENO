@@ -1,9 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Gantt, ViewMode, type Task } from 'gantt-task-react'
-import 'gantt-task-react/dist/index.css'
 import './project-gantt.css'
-import { BriefcaseBusiness, ChevronDown, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react'
+import { BriefcaseBusiness, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, X } from 'lucide-react'
 import type { PhaseName, Project, ProjectStatus } from '../../types'
 import { useWorkspace } from '../../lib/workspace'
 
@@ -31,13 +29,13 @@ const projectStatusLabels: Record<ProjectStatus, string> = {
 
 const euro = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
 
-function ProjectForm({ clients, onClose, onCreate }: { clients: ReturnType<typeof useWorkspace>['clients']; onClose: () => void; onCreate: (project: Project) => void }) {
-  const [name, setName] = useState('')
-  const [clientId, setClientId] = useState(clients[0]?.id ?? '')
-  const [summary, setSummary] = useState('')
-  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10))
-  const [endDate, setEndDate] = useState('')
-  const [budget, setBudget] = useState('')
+function ProjectForm({ clients, onClose, onSave, initial }: { clients: ReturnType<typeof useWorkspace>['clients']; onClose: () => void; onSave: (project: Project) => void; initial?: Project }) {
+  const [name, setName] = useState(initial?.name ?? '')
+  const [clientId, setClientId] = useState(initial?.clientId ?? clients[0]?.id ?? '')
+  const [summary, setSummary] = useState(initial?.summary ?? '')
+  const [startDate, setStartDate] = useState(initial ? new Date(initial.startDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10))
+  const [endDate, setEndDate] = useState(initial ? new Date(initial.endDate).toISOString().slice(0, 10) : '')
+  const [budget, setBudget] = useState(initial ? String(initial.budget) : '')
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -48,90 +46,46 @@ function ProjectForm({ clients, onClose, onCreate }: { clients: ReturnType<typeo
     const phases = phaseNames.map((phase, index) => {
       const from = new Date(start + (end - start) * index / 4)
       const to = new Date(start + (end - start) * (index + 1) / 4)
-      return { id: `${Date.now()}-${index}`, name: phase, startDate: from.toISOString(), endDate: to.toISOString(), progress: 0, status: 'pendiente' as const }
+      const previous = initial?.phases.find((item) => item.name === phase)
+      return { id: previous?.id ?? `${Date.now()}-${index}`, name: phase, startDate: from.toISOString(), endDate: to.toISOString(), progress: previous?.progress ?? 0, status: previous?.status ?? 'pendiente' as const }
     })
-    onCreate({ id: `project-${Date.now()}`, name: name.trim(), clientId, summary: summary.trim(), status: 'en-curso', progress: 0, startDate: new Date(`${startDate}T12:00:00`).toISOString(), endDate: new Date(`${endDate}T18:00:00`).toISOString(), budget: Number(budget) || 0, currency: 'EUR', phases })
+    onSave({ id: initial?.id ?? `project-${Date.now()}`, name: name.trim(), clientId, summary: summary.trim(), status: initial?.status ?? 'en-curso', progress: Math.round(phases.reduce((sum, phase) => sum + phase.progress, 0) / phases.length), startDate: new Date(`${startDate}T12:00:00`).toISOString(), endDate: new Date(`${endDate}T18:00:00`).toISOString(), budget: Number(budget) || 0, currency: 'EUR', phases })
     onClose()
   }
 
   return <motion.div className="client-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
     <motion.section className="card client-modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
-      <div className="client-modal-head"><div><div className="section-kicker"><span className="section-dot" /> NUEVO PROYECTO</div><h2 id="project-modal-title">Añadir proyecto</h2></div><button type="button" className="icon-button" aria-label="Cerrar formulario" onClick={onClose}><X size={16} /></button></div>
+      <div className="client-modal-head"><div><div className="section-kicker"><span className="section-dot" /> {initial ? 'ACTUALIZAR PLAN' : 'NUEVO PROYECTO'}</div><h2 id="project-modal-title">{initial ? 'Editar proyecto' : 'Añadir proyecto'}</h2></div><button type="button" className="icon-button" aria-label="Cerrar formulario" onClick={onClose}><X size={16} /></button></div>
       <form className="client-form" onSubmit={submit}>
         <label>Nombre del proyecto<input autoFocus required maxLength={90} value={name} onChange={(event) => setName(event.target.value)} placeholder="Nombre del proyecto" /></label>
         <label>Cliente<select required value={clientId} onChange={(event) => setClientId(event.target.value)}><option value="" disabled>{clients.length ? 'Selecciona un cliente' : 'Crea primero un cliente'}</option>{clients.map((client) => <option value={client.id} key={client.id}>{client.companyName}</option>)}</select></label>
         <label>Resumen<input value={summary} onChange={(event) => setSummary(event.target.value)} placeholder="Alcance breve" /></label>
         <div className="client-form-row"><label>Inicio<input required type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label><label>Entrega<input required type="date" min={startDate} value={endDate} onChange={(event) => setEndDate(event.target.value)} /></label></div>
         <label>Presupuesto (€)<input min="0" step="100" type="number" value={budget} onChange={(event) => setBudget(event.target.value)} placeholder="0" /></label>
-        <div className="client-form-actions"><button type="button" className="gantt-today" onClick={onClose}>Cancelar</button><button type="submit" className="button-primary" disabled={!clients.length}><Plus size={14} /> Guardar proyecto</button></div>
+        <div className="client-form-actions"><button type="button" className="gantt-today" onClick={onClose}>Cancelar</button><button type="submit" className="button-primary" disabled={!clients.length}><Plus size={14} /> {initial ? 'Guardar cambios' : 'Guardar proyecto'}</button></div>
       </form>
     </motion.section>
   </motion.div>
-}
-
-function toGanttTasks(projects: Project[]): Task[] {
-  return projects.flatMap((project) => {
-    const parent: Task = {
-      id: project.id,
-      name: project.name,
-      type: 'project',
-      start: new Date(project.startDate),
-      end: new Date(project.endDate),
-      progress: project.progress,
-      isDisabled: true,
-      styles: {
-        backgroundColor: '#153543',
-        backgroundSelectedColor: '#1B5262',
-        progressColor: '#43CDBB',
-        progressSelectedColor: '#85F5DF',
-      },
-    }
-
-    const phases = project.phases.map((phase, index): Task => {
-      const palette = phasePalette[phase.name]
-      const previousPhase = project.phases[index - 1]
-      return {
-        id: phase.id,
-        name: phase.name,
-        type: 'task',
-        start: new Date(phase.startDate),
-        end: new Date(phase.endDate),
-        progress: phase.progress,
-        project: project.id,
-        dependencies: previousPhase ? [previousPhase.id] : undefined,
-        isDisabled: true,
-        styles: {
-          backgroundColor: palette.track,
-          backgroundSelectedColor: palette.track,
-          progressColor: palette.fill,
-          progressSelectedColor: palette.selected,
-        },
-      }
-    })
-
-    return [parent, ...phases]
-  })
 }
 
 export default function ProjectGantt() {
   const { projects: allProjects, clients, updateWorkspace } = useWorkspace()
   const [filter, setFilter] = useState<ProjectFilter>('todos')
   const [isCreating, setIsCreating] = useState(false)
-  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Week)
-  const [anchorDate, setAnchorDate] = useState(new Date('2026-11-01T12:00:00+01:00'))
+  const [editing, setEditing] = useState<Project | null>(null)
+  const [anchorDate, setAnchorDate] = useState(new Date())
 
   const visibleProjects = useMemo(
     () => filter === 'todos' ? allProjects : allProjects.filter((project) => project.status === filter),
     [allProjects, filter],
   )
-  const tasks = useMemo(() => toGanttTasks(visibleProjects), [visibleProjects])
   const activeProjects = allProjects.filter((project) => project.status === 'en-curso')
   const countProjects = (status: ProjectFilter) => status === 'todos' ? allProjects.length : allProjects.filter((project) => project.status === status).length
   const averageProgress = activeProjects.length
     ? Math.round(activeProjects.reduce((sum, project) => sum + project.progress, 0) / activeProjects.length)
     : 0
   const nextDelivery = [...activeProjects].sort((a, b) => Date.parse(a.endDate) - Date.parse(b.endDate))[0]
-  const dayOffset = viewMode === ViewMode.Month ? 30 : 7
+  const dayOffset = 30
 
   function moveTimeline(direction: -1 | 1) {
     setAnchorDate((date) => {
@@ -142,8 +96,21 @@ export default function ProjectGantt() {
   }
 
   const timelineLabel = new Intl.DateTimeFormat('es-ES', {
-    month: 'long', year: 'numeric', timeZone: 'Europe/Madrid',
+    month: 'long', year: 'numeric',
   }).format(anchorDate)
+
+  function setPhaseProgress(projectId: string, phaseId: string, progress: number) {
+    updateWorkspace((current) => ({
+      ...current,
+      projects: current.projects.map((project) => {
+        if (project.id !== projectId) return project
+        const phases = project.phases.map((phase) => phase.id === phaseId
+          ? { ...phase, progress, status: progress === 100 ? 'terminada' as const : progress > 0 ? 'en-curso' as const : 'pendiente' as const }
+          : phase)
+        return { ...project, phases, progress: Math.round(phases.reduce((sum, phase) => sum + phase.progress, 0) / phases.length) }
+      }),
+    }))
+  }
 
   return (
     <div className="page-content inner-page project-gantt-page">
@@ -153,7 +120,7 @@ export default function ProjectGantt() {
           <h1>Proyectos <span className="title-count">{String(allProjects.length).padStart(2, '0')}</span></h1>
           <p className="page-intro">Fases, entregas y ritmo de trabajo en una sola vista.</p>
         </div>
-        <button type="button" className="button-primary" onClick={() => setIsCreating(true)}><span aria-hidden="true">＋</span> Nuevo proyecto</button>
+        <button type="button" className="button-primary" onClick={() => setIsCreating(true)} disabled={!clients.length} title={!clients.length ? 'Primero añade un cliente' : undefined}><span aria-hidden="true">＋</span> Nuevo proyecto</button>
       </div>
 
       <div className="project-summary">
@@ -163,7 +130,7 @@ export default function ProjectGantt() {
         <section className="card"><span>Progreso medio</span><b>{averageProgress}%</b><small>En proyectos en curso</small></section>
       </div>
 
-      <section className="card gantt-card project-gantt" aria-label="Diagrama de Gantt de proyectos">
+      <section className="card gantt-card project-gantt" aria-label="Cronograma de proyectos">
         <div className="gantt-toolbar project-gantt-toolbar">
           <div className="filter-pills" role="group" aria-label="Filtrar proyectos por estado">
             {filterOptions.map(({ value, label }) => (
@@ -174,55 +141,24 @@ export default function ProjectGantt() {
           </div>
           <div className="gantt-controls">
             <button type="button" className="icon-button" aria-label="Período anterior" onClick={() => moveTimeline(-1)}><ChevronLeft size={15} /></button>
-            <button type="button" className="gantt-today" onClick={() => setAnchorDate(new Date('2026-11-01T12:00:00+01:00'))}>Hoy</button>
+            <button type="button" className="gantt-today" onClick={() => setAnchorDate(new Date())}>Hoy</button>
             <button type="button" className="icon-button" aria-label="Período siguiente" onClick={() => moveTimeline(1)}><ChevronRight size={15} /></button>
             <span className="gantt-month-label">{timelineLabel}</span>
             <span className="header-divider" />
-            <button type="button" className={`gantt-view ${viewMode === ViewMode.Week ? 'active' : ''}`} onClick={() => setViewMode(ViewMode.Week)}>Semana</button>
-            <button type="button" className={`gantt-view ${viewMode === ViewMode.Month ? 'active' : ''}`} onClick={() => setViewMode(ViewMode.Month)}>Mes</button>
-            <button type="button" className="icon-button gantt-more" aria-label="Más opciones"><ChevronDown size={14} /></button>
+            <span className="gantt-view active">Cronograma</span>
           </div>
         </div>
 
-        {tasks.length ? (
-          <div className="project-gantt-scroll">
-            <svg className="project-gantt-defs" aria-hidden="true" focusable="false">
-              <defs>
-                <linearGradient id="phase-track-cyan" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#1B5061" /><stop offset="52%" stopColor="#123D4A" /><stop offset="100%" stopColor="#0A2733" /></linearGradient>
-                <linearGradient id="phase-fill-cyan" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#44B8D8" /><stop offset="100%" stopColor="#9DEEFF" /></linearGradient>
-                <linearGradient id="phase-track-violet" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#494071" /><stop offset="52%" stopColor="#282346" /><stop offset="100%" stopColor="#19162E" /></linearGradient>
-                <linearGradient id="phase-fill-violet" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#7770CA" /><stop offset="100%" stopColor="#C7D9FF" /></linearGradient>
-                <linearGradient id="phase-track-magenta" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#704061" /><stop offset="52%" stopColor="#43243D" /><stop offset="100%" stopColor="#2B1929" /></linearGradient>
-                <linearGradient id="phase-fill-magenta" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#C94D9F" /><stop offset="100%" stopColor="#FFB8E5" /></linearGradient>
-                <linearGradient id="phase-track-green" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#32675D" /><stop offset="52%" stopColor="#183A37" /><stop offset="100%" stopColor="#102724" /></linearGradient>
-                <linearGradient id="phase-fill-green" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#36B68B" /><stop offset="100%" stopColor="#A3FFE0" /></linearGradient>
-                <linearGradient id="project-track-metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#347485" /><stop offset="48%" stopColor="#153543" /><stop offset="100%" stopColor="#0B222E" /></linearGradient>
-                <linearGradient id="project-fill-metal" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#258C90" /><stop offset="100%" stopColor="#8AFFE1" /></linearGradient>
-              </defs>
-            </svg>
-            <Gantt
-              tasks={tasks}
-              viewMode={viewMode}
-              viewDate={anchorDate}
-              locale="es"
-              listCellWidth="230px"
-              columnWidth={viewMode === ViewMode.Month ? 112 : 64}
-              headerHeight={44}
-              rowHeight={40}
-              barCornerRadius={5}
-              barFill={72}
-              barBackgroundColor="#123D4A"
-              barBackgroundSelectedColor="#1B5262"
-              barProgressColor="#69D8FF"
-              barProgressSelectedColor="#9DEEFF"
-              projectBackgroundColor="#153543"
-              projectBackgroundSelectedColor="#1B5262"
-              projectProgressColor="#43CDBB"
-              projectProgressSelectedColor="#85F5DF"
-              todayColor="rgba(105,216,255,.08)"
-              fontFamily="DM Sans, sans-serif"
-              fontSize="10px"
-            />
+        {visibleProjects.length ? (
+          <div className="project-roadmap-list">
+            {visibleProjects.map((project) => {
+              const client = clients.find((item) => item.id === project.clientId)
+              return <article className="project-roadmap-card" key={project.id}>
+                <header className="project-roadmap-head"><div className="project-roadmap-title"><span className="project-roadmap-icon"><BriefcaseBusiness size={15} /></span><span><b>{project.name}</b><small>{client?.companyName ?? 'Cliente eliminado'} · {project.summary || 'Sin descripción'}</small></span></div><label className="project-status-control"><span className="sr-only">Estado del proyecto</span><select aria-label={`Estado de ${project.name}`} value={project.status} onChange={(event) => updateWorkspace((current) => ({ ...current, projects: current.projects.map((item) => item.id === project.id ? { ...item, status: event.target.value as ProjectStatus } : item) }))}>{Object.entries(projectStatusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><button type="button" className="icon-button" aria-label={`Editar ${project.name}`} title="Editar proyecto" onClick={() => setEditing(project)}><Pencil size={14} /></button><button type="button" className="icon-button" aria-label={`Eliminar ${project.name}`} title="Eliminar proyecto" onClick={() => { if (window.confirm(`¿Eliminar el proyecto ${project.name}? También se eliminarán sus ingresos.`)) updateWorkspace((current) => ({ ...current, projects: current.projects.filter((item) => item.id !== project.id), earnings: current.earnings.filter((item) => item.projectId !== project.id), meetings: current.meetings.map((item) => item.projectId === project.id ? { ...item, projectId: undefined } : item) })) }}><Trash2 size={14} /></button></header>
+                <div className="project-roadmap-meta"><span>{new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' }).format(new Date(project.startDate))} — {new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(project.endDate))}</span><b>{project.progress}% completado</b><span>{euro.format(project.budget)}</span></div>
+                <div className="project-phase-roadmap">{project.phases.map((phase) => { const palette = phasePalette[phase.name]; return <div className="project-phase-control" key={phase.id}><div className="project-phase-heading"><span><i className={`phase-led ${palette.led}`} />{phase.name}</span><b>{phase.progress}%</b></div><div className="phase-progress-track"><i style={{ width: `${phase.progress}%`, background: `linear-gradient(90deg, ${palette.fill}, ${palette.selected})` }} /></div><input aria-label={`Progreso de ${phase.name} en ${project.name}`} type="range" min="0" max="100" value={phase.progress} onChange={(event) => setPhaseProgress(project.id, phase.id, Number(event.target.value))} /></div> })}</div>
+              </article>
+            })}
           </div>
         ) : (
           <div className="project-gantt-empty"><BriefcaseBusiness size={18} /><b>No hay proyectos en este estado</b><small>Selecciona otro filtro para ver el resto de la planificación.</small></div>
@@ -236,9 +172,9 @@ export default function ProjectGantt() {
         </div>
       </section>
 
-      <div className="project-gantt-client-notes" aria-hidden="true">{clients.length} cuentas vinculadas</div>
       <div className="sr-only">Estados: {Object.values(projectStatusLabels).join(', ')}.</div>
-      <AnimatePresence>{isCreating && <ProjectForm clients={clients} onClose={() => setIsCreating(false)} onCreate={(project) => updateWorkspace((current) => ({ ...current, projects: [project, ...current.projects] }))} />}</AnimatePresence>
+      <AnimatePresence>{isCreating && <ProjectForm clients={clients} onClose={() => setIsCreating(false)} onSave={(project) => updateWorkspace((current) => ({ ...current, projects: [project, ...current.projects] }))} />}{editing && <ProjectForm clients={clients} initial={editing} onClose={() => setEditing(null)} onSave={(project) => updateWorkspace((current) => ({ ...current, projects: current.projects.map((item) => item.id === project.id ? project : item) }))} />}</AnimatePresence>
     </div>
   )
 }
+

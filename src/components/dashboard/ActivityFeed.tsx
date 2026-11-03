@@ -37,6 +37,7 @@ export default function ActivityFeed({ items, referenceTime }: ActivityFeedProps
       </div>
 
       <div className="activity-list" aria-live="polite">
+        {!items.length && <div className="client-empty-state"><span className="empty-icon"><CreditCard size={18} /></span><b>La actividad aparecerá aquí</b><small>Cuando registres clientes, proyectos, reuniones o ingresos, verás sus cambios recientes.</small></div>}
         {items.map((item) => {
           const appearance = activityAppearance[item.kind]
           const Icon = appearance.icon
@@ -58,3 +59,4 @@ export default function ActivityFeed({ items, referenceTime }: ActivityFeedProps
     </section>
   )
 }
+

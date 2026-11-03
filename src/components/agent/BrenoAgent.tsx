@@ -2,6 +2,7 @@ import { useState, type FormEvent, type KeyboardEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, Check, Command, Plus, Send, Sparkles, Video, X } from 'lucide-react'
 import { serviceLabels, type Lead } from '../../types'
+import { mockLeads } from '../../mockData'
 import { useWorkspace } from '../../lib/workspace'
 import './breno-agent.css'
 
@@ -60,7 +61,8 @@ function LeadCard({ lead, saved, onSave }: { lead: Lead; saved: boolean; onSave:
 }
 
 export default function BrenoAgent({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { leads: availableLeads, updateWorkspace } = useWorkspace()
+  const { leads, updateWorkspace } = useWorkspace()
+  const availableLeads = [...mockLeads, ...leads.filter((lead) => !mockLeads.some((sample) => sample.id === lead.id))]
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([initialMessage])
 
@@ -97,7 +99,9 @@ export default function BrenoAgent({ open, onClose }: { open: boolean; onClose: 
   }
 
   function saveLead(lead: Lead) {
-    updateWorkspace((current) => ({ ...current, leads: current.leads.map((item) => item.id === lead.id ? { ...item, status: 'revisado' } : item) }))
+    updateWorkspace((current) => ({ ...current, leads: current.leads.some((item) => item.id === lead.id)
+      ? current.leads.map((item) => item.id === lead.id ? { ...item, status: 'revisado' } : item)
+      : [{ ...lead, status: 'revisado' }, ...current.leads] }))
     setMessages((current) => [...current, {
       id: `saved-${lead.id}-${Date.now()}`,
       role: 'agent',
@@ -156,3 +160,4 @@ export default function BrenoAgent({ open, onClose }: { open: boolean; onClose: 
     </AnimatePresence>
   )
 }
+

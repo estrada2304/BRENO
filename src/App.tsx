@@ -13,7 +13,7 @@ import TopBar from './components/layout/TopBar'
 import { appPagePaths, getPageFromPath, type AppPage } from './components/layout/layout.types'
 import AuthScreen from './components/auth/AuthScreen'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
-import { WorkspaceProvider } from './lib/workspace'
+import { useWorkspace, WorkspaceProvider } from './lib/workspace'
 
 type AppLayoutContext = {
   navigateToPage: (page: AppPage) => void
@@ -76,6 +76,7 @@ function AuthGate() {
 }
 
 function AppLayout({ userEmail, onSignOut }: ApplicationRouterProps) {
+  const workspaceState = useWorkspace()
   const location = useLocation()
   const navigate = useNavigate()
   const [agentOpen, setAgentOpen] = useState(false)
@@ -92,7 +93,7 @@ function AppLayout({ userEmail, onSignOut }: ApplicationRouterProps) {
       <div className="ambient ambient-two" />
       <Sidebar onAgent={context.openAgent} open={mobileNav} setOpen={setMobileNav} profileEmail={userEmail} />
       <main className="main-shell">
-        <TopBar page={page} onOpenAgent={context.openAgent} onOpenMenu={() => setMobileNav(true)} onSignOut={onSignOut} />
+        <TopBar page={page} onOpenAgent={context.openAgent} onOpenMenu={() => setMobileNav(true)} onSignOut={onSignOut} syncStatus={workspaceState.syncStatus} syncError={workspaceState.syncError} />
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={location.pathname} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: .2 }}>
             <Outlet context={context} />
@@ -128,3 +129,4 @@ function ApplicationRouter({ userEmail = '', onSignOut }: ApplicationRouterProps
 export default function App() {
   return <AuthGate />
 }
+

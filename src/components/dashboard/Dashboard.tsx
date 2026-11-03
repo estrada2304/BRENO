@@ -59,8 +59,8 @@ export default function Dashboard({ setPage, onAgent }: DashboardProps) {
           <h1>Buenos días, Breno <span className="wave">✳</span></h1>
           <p className="page-intro">Aquí tienes lo que pasa en tu estudio hoy.</p>
         </div>
-        <button type="button" className="button-primary" onClick={() => setPage('Proyectos')}>
-          <span aria-hidden="true">＋</span> Nuevo proyecto
+        <button type="button" className="button-primary" onClick={() => setPage(clients.length ? 'Proyectos' : 'Clientes')}>
+          <span aria-hidden="true">＋</span> {clients.length ? 'Nuevo proyecto' : 'Añadir primer cliente'}
         </button>
       </div>
 
@@ -68,27 +68,26 @@ export default function Dashboard({ setPage, onAgent }: DashboardProps) {
         <MetricCard
           label="Ingresos del mes"
           value={euro.format(currentMonthEarnings)}
-          note="Cobros confirmados este mes"
+          note={earnings.length ? 'Cobros confirmados este mes' : 'Aún no hay ingresos registrados'}
           accent="mint"
           icon={CreditCard}
-          sparkline={[24, 34, 29, 43, 38, 53, 48, 62, 45, 73, 58, 88]}
+          sparkline={Array(12).fill(0)}
         />
         <MetricCard
           label="Proyectos activos"
           value={String(activeProjects.length).padStart(2, '0')}
-          note={`${activeProjects.filter((project) => project.progress < 70).length} en fase de desarrollo`}
+          note={activeProjects.length ? `${activeProjects.filter((project) => project.progress < 70).length} en fase de desarrollo` : 'Añade proyectos para ver su avance'}
           accent="violet"
           icon={BriefcaseBusiness}
-          sparkline={[52, 39, 60, 42, 72, 51, 36, 68, 46, 77, 54, 64]}
+          sparkline={Array(12).fill(0)}
         />
         <MetricCard
           label="Clientes activos"
           value={String(activeClients).padStart(2, '0')}
-          change="+2"
-          note={`${prospects} prospectos por convertir`}
+          note={clients.length ? `${prospects} prospectos por convertir` : 'Aún no has añadido clientes'}
           accent="cyan"
           icon={Users}
-          sparkline={[28, 37, 33, 51, 43, 62, 49, 72, 58, 83, 67, 89]}
+          sparkline={Array(12).fill(0)}
         />
         <MetricCard
           label="Por cobrar"
@@ -98,7 +97,7 @@ export default function Dashboard({ setPage, onAgent }: DashboardProps) {
           note={earnings.filter((earning) => earning.status !== 'pagado').sort((a, b) => Date.parse(a.dueAt) - Date.parse(b.dueAt))[0] ? `Próximo vencimiento · ${formatDate(earnings.filter((earning) => earning.status !== 'pagado').sort((a, b) => Date.parse(a.dueAt) - Date.parse(b.dueAt))[0].dueAt)}` : 'Sin cobros pendientes'}
           accent="amber"
           icon={Clock3}
-          sparkline={[74, 51, 83, 68, 45, 76, 57, 89, 61, 78, 49, 92]}
+          sparkline={Array(12).fill(0)}
         />
       </div>
 
@@ -132,6 +131,7 @@ export default function Dashboard({ setPage, onAgent }: DashboardProps) {
                   </div>
                 )
               })}
+              {!projects.length && <div className="client-empty-state"><span className="empty-icon"><BriefcaseBusiness size={18} /></span><b>Tu primer proyecto empieza con un cliente</b><small>Registra tu cartera y crea el proyecto desde su ficha.</small><button type="button" onClick={() => setPage('Clientes')}>Ir a clientes</button></div>}
             </div>
           </section>
           <ActivityFeed items={activity} referenceTime={now.toISOString()} />
@@ -163,6 +163,7 @@ export default function Dashboard({ setPage, onAgent }: DashboardProps) {
                   </div>
                 )
               })}
+              {!todaysMeetings.length && <div className="dashboard-agenda-empty">No tienes reuniones para hoy.</div>}
             </div>
             <button type="button" className="calendar-link" onClick={() => setPage('Calendario')}>Ver calendario completo <ArrowRight size={14} /></button>
           </section>
@@ -170,7 +171,7 @@ export default function Dashboard({ setPage, onAgent }: DashboardProps) {
           <section className="card agent-card" aria-label="Acceso al agente BRENO">
             <div className="agent-orbit"><div className="orbit-ring ring-one" /><div className="orbit-ring ring-two" /><div className="orbit-core"><span aria-hidden="true">✳</span></div><span className="orbit-dot one" /><span className="orbit-dot two" /><span className="orbit-dot three" /></div>
             <div className="agent-card-copy">
-              <span className="agent-chip"><span className="live-indicator" /> BRENO AI · ONLINE</span>
+              <span className="agent-chip"><span className="live-indicator" /> AGENTE BRENO · DEMO</span>
               <h3>Un impulso<br />para tu próximo <em>sí.</em></h3>
               <p>Encuentra clientes que necesitan exactamente lo que haces.</p>
               <button type="button" onClick={onAgent}>Encontrar oportunidades <ArrowRight size={14} /></button>
@@ -183,3 +184,4 @@ export default function Dashboard({ setPage, onAgent }: DashboardProps) {
     </div>
   )
 }
+

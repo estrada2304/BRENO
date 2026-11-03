@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { MoreHorizontal, Plus, Search, Users, X } from 'lucide-react'
+import { MoreHorizontal, Pencil, Plus, Search, Trash2, Users, X } from 'lucide-react'
 import { serviceLabels, type Client, type ClientStatus, type ServiceInterest } from '../../types'
 import { useWorkspace } from '../../lib/workspace'
 
@@ -45,15 +45,16 @@ function ClientStatusBadge({ status }: { status: ClientStatus }) {
 
 type ClientFormProps = {
   onClose: () => void
-  onCreate: (client: Client) => void
+  onSave: (client: Client) => void
+  initial?: Client
 }
 
-function ClientForm({ onClose, onCreate }: ClientFormProps) {
-  const [companyName, setCompanyName] = useState('')
-  const [contactName, setContactName] = useState('')
-  const [email, setEmail] = useState('')
-  const [service, setService] = useState<ServiceInterest>('pagina-web')
-  const [estimatedValue, setEstimatedValue] = useState('')
+function ClientForm({ onClose, onSave, initial }: ClientFormProps) {
+  const [companyName, setCompanyName] = useState(initial?.companyName ?? '')
+  const [contactName, setContactName] = useState(initial?.contactName ?? '')
+  const [email, setEmail] = useState(initial?.email ?? '')
+  const [service, setService] = useState<ServiceInterest>(initial?.servicesOfInterest[0] ?? 'pagina-web')
+  const [estimatedValue, setEstimatedValue] = useState(initial ? String(initial.estimatedValue) : '')
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -61,17 +62,18 @@ function ClientForm({ onClose, onCreate }: ClientFormProps) {
     const cleanContact = contactName.trim()
     if (!cleanName || !cleanContact || !email.trim()) return
 
-    onCreate({
-      id: `client-${Date.now()}`,
+    onSave({
+      ...initial,
+      id: initial?.id ?? `client-${Date.now()}`,
       companyName: cleanName,
       contactName: cleanContact,
       email: email.trim(),
-      status: 'prospecto',
+      status: initial?.status ?? 'prospecto',
       servicesOfInterest: [service],
       estimatedValue: Number(estimatedValue) || 0,
       currency: 'EUR',
-      source: 'Añadido desde BRENO',
-      createdAt: new Date().toISOString(),
+      source: initial?.source ?? 'Añadido desde BRENO',
+      createdAt: initial?.createdAt ?? new Date().toISOString(),
       initials: cleanName.slice(0, 1).toLocaleUpperCase('es-ES'),
       accent: 'cyan',
     })
@@ -90,8 +92,8 @@ function ClientForm({ onClose, onCreate }: ClientFormProps) {
         exit={{ opacity: 0, y: 8, scale: 0.98 }}
         transition={{ duration: 0.18 }}
       >
-        <div className="client-modal-head">
-          <div><div className="section-kicker"><span className="section-dot" /> NUEVO REGISTRO</div><h2 id="client-modal-title">Añadir cliente</h2></div>
+      <div className="client-modal-head">
+          <div><div className="section-kicker"><span className="section-dot" /> {initial ? 'ACTUALIZAR REGISTRO' : 'NUEVO REGISTRO'}</div><h2 id="client-modal-title">{initial ? 'Editar cliente' : 'Añadir cliente'}</h2></div>
           <button type="button" className="icon-button" aria-label="Cerrar formulario" onClick={onClose}><X size={16} /></button>
         </div>
         <form className="client-form" onSubmit={handleSubmit}>
@@ -102,7 +104,7 @@ function ClientForm({ onClose, onCreate }: ClientFormProps) {
             <label>Servicio de interés<select value={service} onChange={(event) => setService(event.target.value as ServiceInterest)}>{Object.entries(serviceLabels).map(([id, label]) => <option value={id} key={id}>{label}</option>)}</select></label>
             <label>Valor estimado (€)<input min="0" step="100" type="number" value={estimatedValue} onChange={(event) => setEstimatedValue(event.target.value)} placeholder="0" /></label>
           </div>
-          <div className="client-form-actions"><button type="button" className="gantt-today" onClick={onClose}>Cancelar</button><button type="submit" className="button-primary"><Plus size={14} /> Guardar prospecto</button></div>
+          <div className="client-form-actions"><button type="button" className="gantt-today" onClick={onClose}>Cancelar</button><button type="submit" className="button-primary"><Plus size={14} /> {initial ? 'Guardar cambios' : 'Guardar prospecto'}</button></div>
         </form>
       </motion.section>
     </motion.div>
@@ -114,6 +116,7 @@ export default function ClientsPage() {
   const [filter, setFilter] = useState<StatusFilter>('todos')
   const [search, setSearch] = useState('')
   const [isCreating, setIsCreating] = useState(false)
+  const [editing, setEditing] = useState<Client | null>(null)
 
   const visibleClients = useMemo(() => {
     const query = search.trim().toLocaleLowerCase('es-ES')
@@ -176,16 +179,17 @@ export default function ClientsPage() {
               <ClientStatusBadge status={client.status} />
               <span className="client-amount">{formatEuro.format(client.estimatedValue)}</span>
               <time className="client-date" dateTime={client.createdAt}>{new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Europe/Madrid' }).format(new Date(client.createdAt))}</time>
-              <button type="button" className="icon-button" aria-label={`Cambiar estado de ${client.companyName}`} title="Cambiar estado prospecto / activo / cerrado" onClick={() => updateWorkspace((current) => ({ ...current, clients: current.clients.map((item) => item.id === client.id ? { ...item, status: item.status === 'prospecto' ? 'activo' : item.status === 'activo' ? 'cerrado' : 'prospecto' } : item) }))}><MoreHorizontal size={17} /></button>
+              <div className="client-row-actions"><button type="button" className="icon-button" aria-label={`Editar ${client.companyName}`} title="Editar cliente" onClick={() => setEditing(client)}><Pencil size={14} /></button><button type="button" className="icon-button" aria-label={`Cambiar estado de ${client.companyName}`} title={`Estado actual: ${statusLabels[client.status]}. Cambiar estado`} onClick={() => updateWorkspace((current) => ({ ...current, clients: current.clients.map((item) => item.id === client.id ? { ...item, status: item.status === 'prospecto' ? 'activo' : item.status === 'activo' ? 'cerrado' : 'prospecto' } : item) }))}><MoreHorizontal size={17} /></button><button type="button" className="icon-button" aria-label={`Eliminar ${client.companyName}`} title="Eliminar cliente" onClick={() => { if (window.confirm(`¿Eliminar a ${client.companyName}? También se desvinculará de proyectos, reuniones e ingresos.`)) updateWorkspace((current) => ({ ...current, clients: current.clients.filter((item) => item.id !== client.id), projects: current.projects.filter((item) => item.clientId !== client.id), meetings: current.meetings.filter((item) => item.clientId !== client.id), earnings: current.earnings.filter((item) => item.clientId !== client.id) })) }}><Trash2 size={14} /></button></div>
             </article>
           )) : (
-            <div className="client-empty-state"><span className="empty-icon"><Users size={18} /></span><b>No encontramos clientes</b><small>Prueba otra búsqueda o cambia el filtro de estado.</small><button type="button" onClick={() => { setSearch(''); setFilter('todos') }}>Limpiar filtros</button></div>
+            <div className="client-empty-state"><span className="empty-icon"><Users size={18} /></span><b>{clients.length ? 'No encontramos clientes' : 'Tu directorio está listo'}</b><small>{clients.length ? 'Prueba otra búsqueda o cambia el filtro de estado.' : 'Añade tu primer cliente o prospecto para comenzar a organizar tu estudio.'}</small>{clients.length ? <button type="button" onClick={() => { setSearch(''); setFilter('todos') }}>Limpiar filtros</button> : <button type="button" onClick={() => setIsCreating(true)}>Añadir primer cliente</button>}</div>
           )}
         </div>
         <div className="directory-footer">Mostrando <b>{visibleClients.length}</b> de <b>{clients.length}</b> clientes<span className="client-directory-footnote">Los cambios se sincronizan con tu espacio de trabajo.</span></div>
       </section>
 
-      <AnimatePresence>{isCreating && <ClientForm onClose={() => setIsCreating(false)} onCreate={(client) => updateWorkspace((current) => ({ ...current, clients: [client, ...current.clients] }))} />}</AnimatePresence>
+      <AnimatePresence>{isCreating && <ClientForm onClose={() => setIsCreating(false)} onSave={(client) => updateWorkspace((current) => ({ ...current, clients: [client, ...current.clients] }))} />}{editing && <ClientForm initial={editing} onClose={() => setEditing(null)} onSave={(client) => updateWorkspace((current) => ({ ...current, clients: current.clients.map((item) => item.id === client.id ? client : item) }))} />}</AnimatePresence>
     </div>
   )
 }
+
