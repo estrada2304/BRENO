@@ -36,6 +36,7 @@ jobs:
       - name: Build app
         run: pnpm build
         env:
+          BRENO_BASE_PATH: /BRENO/
           VITE_AUTH_REQUIRED: 'true'
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
@@ -56,3 +57,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
